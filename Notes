@@ -8,3 +8,7 @@ Other ideas:
     sealed abstract class HistoryTree
     case class Node(children: List[HistoryTree], value: Rule) extends HistoryTree
     case class Leaf(value:Rule) extends HistoryTree
+
+
+- The trees:
+    The two classes for trees are almost identical, with little difference - how to make this better?

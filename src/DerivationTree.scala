@@ -1,9 +1,9 @@
-type DerivationNode = (String, DerivationNode)
 class DerivationTree(initialVariable: String) {
-  private val initialNode = (initialVariable, initialNode)
+  private val initialNode = new DerivationNode(initialVariable, initialNode)
   private var nodes: Set[DerivationNode] = Set(initialNode)
 
-  def addChild(rule: Rule, parentRule: Rule): Unit = {
-    nodes = nodes + (rule, parentRule)
+  def addChild(value: String, parent: String): Unit = {
+    val parentNode = nodes.find(p => p.getValue() == parent).get       // Can give exception if the parent is not in nodes
+    nodes = nodes + new DerivationNode(value, parentNode)
   }
 }
