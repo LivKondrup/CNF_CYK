@@ -12,3 +12,9 @@ Other ideas:
 
 - The trees:
     The two classes for trees are almost identical, with little difference - how to make this better?
+
+
+
+Backlog:
+- In historyTree.addChild, what happens if the parent rule is there multiple times in the tree?
+    The parameter (parent) should maybe be a node instead of a rule?

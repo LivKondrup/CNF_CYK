@@ -1,2 +1,2 @@
-class Grammar(rules: List[Rule]) {
+class Grammar(rules: List[Rule], start:Rule) {
 }
