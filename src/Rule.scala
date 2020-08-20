@@ -1,7 +1,4 @@
 class Rule(left: String, right: List[String]) {
-  private var isChainRule = false
+  private var isChainRule = right.size == 1
 
-  if (right.size == 1){
-    isChainRule = true
-  }
 }
