@@ -1,14 +1,14 @@
-class Grammar(rules: List[Rule], start:Rule) {
+class Grammar(rules: List[Rule], start:String) {
 
   def ConvertToCNF():Unit = {
-    removeLambda()
-    removeChains()
+    eliminateLambda()
+    eliminateChains()
     fixRighSides()
   }
 
-  private def removeLambda():Unit = ???
+  def eliminateLambda():Unit = ???
 
-  private def removeChains():Unit = ???
+  def eliminateChains():Unit = ???
 
-  private def fixRighSides():Unit = ???
+  def fixRighSides():Unit = ???
 }

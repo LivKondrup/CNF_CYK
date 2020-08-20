@@ -18,3 +18,5 @@ Other ideas:
 Backlog:
 - In historyTree.addChild, what happens if the parent rule is there multiple times in the tree?
     The parameter (parent) should maybe be a node instead of a rule?
+
+- In both tree structures, top can not have itself as a parent

@@ -4,7 +4,7 @@ object Main {
 
 
     val rule: Rule = new Rule("left", List("right1", "right2"))
-    val historyNode: HistoryNode = new
+    //val historyNode: HistoryNode = new
 
   }
 }

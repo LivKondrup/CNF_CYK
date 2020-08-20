@@ -1,5 +1,5 @@
 class HistoryTree(initialRule: Rule){
-  private val top = new HistoryNode(initialRule, top, 0)
+  private val top = new HistoryNode(initialRule, ???, 0)
   private var nodes: Set[HistoryNode] = Set(top)
 
   def addChild(rule: Rule, parentRule: Rule, step: Int): Unit = {

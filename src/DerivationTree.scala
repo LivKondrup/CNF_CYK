@@ -1,5 +1,5 @@
 class DerivationTree(initialVariable: String) {
-  private val initialNode = new DerivationNode(initialVariable, initialNode)
+  private val initialNode = new DerivationNode(initialVariable, ???)
   private var nodes: Set[DerivationNode] = Set(initialNode)
 
   def addChild(value: String, parent: String): Unit = {
