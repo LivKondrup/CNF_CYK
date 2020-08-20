@@ -6,7 +6,16 @@ class Grammar(rules: List[Rule], start:String) {
     fixRighSides()
   }
 
-  def eliminateLambda():Unit = ???
+  def eliminateLambda():Unit = {
+    var nullable: Set[String] = Set()   // To maintain the nullable variables
+    for (rule <- rules){
+      for (symbol <- rule.getRight()){
+        if (symbol.equalsIgnoreCase("lambda")){
+          nullable += rule.getLeft()
+        }
+      }
+    }
+  }
 
   def eliminateChains():Unit = ???
 
