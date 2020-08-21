@@ -6,9 +6,8 @@ class Grammar(rules: List[Rule], start:String) {
     fixRighSides()
   }
 
-  def eliminateLambda():Unit = {
-    var nullable: Set[String] = Set()   // To maintain the nullable variables
-
+  def findNullables(): Set[String] = {
+    var nullable: Set[String] = Set()   // To maintain the list of nullables
     // Finds all variables that can lead to lambda
     for (rule <- rules){    // Going through all rules in the grammar
       var rightIsLambda = true    // Maintains if all of the symbols in the right-sides so far is lambda
@@ -39,6 +38,14 @@ class Grammar(rules: List[Rule], start:String) {
       }
       nullableChanged = nullable.equals(nullableBefore)   // If the list of nullables have changed, the while-loop should keep going
     }
+
+    return nullable
+  }
+
+  def eliminateLambda():Unit = {
+    var nullable: Set[String] = findNullables()
+
+
   }
 
   def eliminateChains():Unit = ???
