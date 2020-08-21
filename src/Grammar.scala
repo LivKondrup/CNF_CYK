@@ -1,6 +1,6 @@
-class Grammar(rules: List[Rule], start:String) {
+class Grammar(rules: Set[Rule], start:String) {
 
-  def getRules(): List[Rule] ={
+  def getRules(): Set[Rule] ={
     return rules
   }
 

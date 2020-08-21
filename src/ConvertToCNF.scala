@@ -1,3 +1,5 @@
+import scala.{::, List}
+
 object ConvertToCNF {
   def getGrammarOnCNF(grammar: Grammar):Unit = {
     var convertedGrammar = grammar
@@ -8,9 +10,8 @@ object ConvertToCNF {
 
   def eliminateLambda(grammar:Grammar):Grammar = {
     var nullable: Set[String] = findNullables(grammar)
-    for (rule <- grammar.getRules()){
+    var rulesInNewGrammar=List[Rule]()
 
-    }
     return ???
   }
 
