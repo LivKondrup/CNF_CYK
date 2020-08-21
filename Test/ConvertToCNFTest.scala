@@ -3,7 +3,7 @@ import java.util
 import org.junit.jupiter.api.{BeforeEach, Test}
 
 
-class GrammarTest {
+class ConvertToCNFTest {
   var grammar1:Grammar = _   // A grammar for the tests to use
   @BeforeEach
   def setUp(): Unit ={
@@ -34,7 +34,7 @@ class GrammarTest {
   @Test
   def findAllNullableVaribles(): Unit ={
     val expectedNullables = Set("S", "A", "B")
-    val actualNullables = grammar1.findNullables()
+    val actualNullables = ConvertToCNF.findNullables(grammar1)
     assert(expectedNullables == actualNullables)
   }
 }
