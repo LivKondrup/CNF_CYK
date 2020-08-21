@@ -27,7 +27,7 @@ class ConvertToCNFTest {
     val rules2: List[Rule] = List(rule6, rule7, rule8, rule9, rule10, rule11, rule12)
     val grammar2: Grammar = new Grammar(rules2, "S") // How the grammar should look after being converted
 
-    grammar1.eliminateLambda()  //Converting grammar to not have lambda rules
+    ConvertToCNF.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
     assert(grammar1.equals(grammar2))
   }
 

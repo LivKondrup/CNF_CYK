@@ -1,9 +1,7 @@
 object ConvertToCNF {
-  //var grammar:Grammar=_
-  def getGrammarCNF(grammar: Grammar):Unit = {
-    //this.grammar = grammar
-    var convertedGrammar = new Grammar(List(), "")
-    convertedGrammar = eliminateLambda(grammar)
+  def getGrammarOnCNF(grammar: Grammar):Unit = {
+    var convertedGrammar = grammar
+    convertedGrammar = eliminateLambda(convertedGrammar)
     convertedGrammar = eliminateChains(convertedGrammar)
     convertedGrammar = fixRighSides(convertedGrammar)
   }
@@ -17,6 +15,10 @@ object ConvertToCNF {
   }
 
   def findNullables(grammar: Grammar): Set[String] = {
+    return (findNullableVariables(grammar, findLambdaVariables(grammar)))
+  }
+
+  def findLambdaVariables(grammar: Grammar):Set[String] = {
     var nullable: Set[String] = Set()   // To maintain the list of nullables
     // Finds all variables that can lead to lambda
     for (rule <- grammar.getRules()){    // Going through all rules in the grammar
@@ -30,7 +32,11 @@ object ConvertToCNF {
         nullable += rule.getLeft()
       }
     }
+    return nullable
+  }
 
+  def findNullableVariables(grammar: Grammar, lambdaVariables:Set[String]):Set[String] = {
+    var nullable:Set[String] = lambdaVariables
     // Finds all other nullable variables
     var nullableChanged = true    // Is true if the list of nullables have changed after the last time of going through the entire grammar
     while (nullableChanged){
@@ -48,7 +54,6 @@ object ConvertToCNF {
       }
       nullableChanged = !nullable.equals(nullableBefore)   // If the list of nullables have changed, the while-loop should keep going
     }
-
     return nullable
   }
 
