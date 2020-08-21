@@ -21,7 +21,7 @@ object ConvertToCNF {
     }
     for (rule <- rulesInNewGrammar){    // This loop removes rules that does not have anything on the rightside
                                         // The rules happens when the subset in loop above is all of the variables on the rightside
-      if (rule.getRight().size == 0){
+      if (rule.getRight().isEmpty){
         rulesInNewGrammar = rulesInNewGrammar - rule
       }
     }
