@@ -19,6 +19,13 @@ object ConvertToCNF {
       }
       rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight(). filter(s => !s.equalsIgnoreCase("lambda")))    // Adds the "whole" rule except if it is only lamda on the right-side
     }
+    for (rule <- rulesInNewGrammar){
+      if (rule.getRight().size == 0){
+        rulesInNewGrammar = rulesInNewGrammar - rule
+      }
+    }
+
+    println(rulesInNewGrammar)
     return new Grammar(rulesInNewGrammar, grammar.getStartVariable())
   }
 
