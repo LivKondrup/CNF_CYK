@@ -19,7 +19,8 @@ object ConvertToCNF {
       }
       rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight(). filter(s => !s.equalsIgnoreCase("lambda")))    // Adds the "whole" rule except if it is only lamda on the right-side
     }
-    for (rule <- rulesInNewGrammar){
+    for (rule <- rulesInNewGrammar){    // This loop removes rules that does not have anything on the rightside
+                                        // The rules happens when the subset in loop above is all of the variables on the rightside
       if (rule.getRight().size == 0){
         rulesInNewGrammar = rulesInNewGrammar - rule
       }
