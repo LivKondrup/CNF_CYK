@@ -9,10 +9,17 @@ object ConvertToCNF {
   }
 
   def eliminateLambda(grammar:Grammar):Grammar = {
-    var nullable: Set[String] = findNullables(grammar)
-    var rulesInNewGrammar=List[Rule]()
+    val nullable: Set[String] = findNullables(grammar)
+    var rulesInNewGrammar = Set[Rule]()
 
-    return ???
+    for (rule <- grammar.getRules()){
+      val nullableVariablesIterator:Iterator[Set[String]] = nullable.filter(p=>rule.getRight().contains(p)).subsets()   //List of all subsets of nullable variables in the right-side of the rule
+      for (subset <- nullableVariablesIterator){    // For all subsets
+        rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight().filter(s => !subset.contains(s) && !s.equalsIgnoreCase("lambda")))  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
+      }
+      rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight(). filter(s => !s.equalsIgnoreCase("lambda")))    // Adds the "whole" rule except if it is only lamda on the right-side
+    }
+    return new Grammar(rulesInNewGrammar, grammar.getStartVariable())
   }
 
   def findNullables(grammar: Grammar): Set[String] = {
