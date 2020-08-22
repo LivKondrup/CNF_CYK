@@ -21,13 +21,18 @@ class ConvertToCNFTest {
     val rule10:Rule = new Rule("A", List("a"))
     val rule11:Rule = new Rule("A", List("a" ,"A"))
     val rule12:Rule = new Rule("B", List("b"))
+
     val rules2: Set[Rule] = Set(rule6, rule7, rule8, rule9, rule10, rule11, rule12)
     val grammar2: Grammar = new Grammar(rules2, "S") // How the grammar should look after being converted
-
     val grammar3 = ConvertToCNF.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
-    grammar2.getRules().foreach(r => print(r))
-    grammar3.equals(grammar2)
+
     assert(grammar3.equals(grammar2))
+  }
+
+  @Test def grammarHasChanged(): Unit = {
+    val grammar2 = ConvertToCNF.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
+
+    assert(!grammar1.equals(grammar2))
   }
 
   @Test

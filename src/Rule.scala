@@ -24,13 +24,7 @@ class Rule(left: String, right: List[String]) {
   }
 
   @Override
-  override def hashCode(): Int = {
-    val a =  right.hashCode().abs
-    val b = a/1000
-    val c = b.toString
-    println("c: " + c)
-    println(left.hashCode().toString)
-    println((left.hashCode().toString + (c).toInt))
+  override def hashCode(): Int = {      // Is this hashcode good enough???
     return (left.hashCode().toString + (right.hashCode().abs/1000).toString).toInt
   }
 }

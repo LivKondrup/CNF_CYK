@@ -25,9 +25,6 @@ object ConvertToCNF {
         rulesInNewGrammar = rulesInNewGrammar - rule
       }
     }
-
-    rulesInNewGrammar.foreach(r => print(r))
-    println("")
     return new Grammar(rulesInNewGrammar, grammar.getStartVariable())
   }
 
