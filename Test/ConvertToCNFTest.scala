@@ -16,7 +16,7 @@ class ConvertToCNFTest {
     grammar1 = new Grammar(rules, "S") // The grammar
   }
 
-  @Test def noLambdaRulesAfterRemoveLambdaMethod(): Unit = {
+  @Test def grammarCorrectAfterRemoveLambdaMethod(): Unit = {
     val rule6:Rule = new Rule("S", Set("A"))   // Rules of the grammar that grammar1 should be converted to
     val rule7:Rule = new Rule("S", Set("B"))
     val rule8:Rule = new Rule("S", Set("A", "B"))
@@ -27,8 +27,8 @@ class ConvertToCNFTest {
     val rules2: Set[Rule] = Set(rule6, rule7, rule8, rule9, rule10, rule11, rule12)
     val grammar2: Grammar = new Grammar(rules2, "S") // How the grammar should look after being converted
 
-    ConvertToCNF.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
-    assert(grammar1.equals(grammar2))
+    val grammar3 = ConvertToCNF.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
+    assert(grammar3.equals(grammar2))
 
   }
 

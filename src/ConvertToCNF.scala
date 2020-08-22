@@ -13,11 +13,12 @@ object ConvertToCNF {
     var rulesInNewGrammar = Set[Rule]()
 
     for (rule <- grammar.getRules()){
-      val nullableVariablesIterator:Iterator[Set[String]] = nullable.filter(p=>rule.getRight().contains(p)).subsets()   //List of all subsets of nullable variables in the right-side of the rule
+      val nullableVariablesIterator:Iterator[Set[String]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   //List of all subsets of nullable variables in the right-side of the rule
       for (subset <- nullableVariablesIterator){    // For all subsets
-        rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight().filter(s => !subset.contains(s) && !s.equalsIgnoreCase("lambda")))  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
+        val newRight = rule.getRight().filter(s => !subset.contains(s) && !s.equalsIgnoreCase("lambda"))
+        rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
       }
-      rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight(). filter(s => !s.equalsIgnoreCase("lambda")))    // Adds the "whole" rule except if it is only lamda on the right-side
+      //rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight().filter(s => !s.equalsIgnoreCase("lambda")))    // Adds the "whole" rule except if it is only lamda on the right-side
     }
     for (rule <- rulesInNewGrammar){    // This loop removes rules that does not have anything on the rightside
                                         // The rules happens when the subset in loop above is all of the variables on the rightside
@@ -26,7 +27,7 @@ object ConvertToCNF {
       }
     }
 
-    println(rulesInNewGrammar)
+    rulesInNewGrammar.foreach(r => print(r))
     return new Grammar(rulesInNewGrammar, grammar.getStartVariable())
   }
 

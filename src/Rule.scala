@@ -9,24 +9,17 @@ class Rule(left: String, right: Set[String]) {
   }
 
   @Override
-  def equals(other:Rule):Boolean = {
-    var allOtherRightInThis = true
-    var allThisRightInOther = true
-    for (s <- other.getRight()){
-      if (!right.contains(s)){
-        allOtherRightInThis = false
+  override def equals(other:Any):Boolean = {
+    other match{
+      case other:Rule =>{
+        return this.left == other.getLeft() && this.right == other.getRight()
       }
     }
-    for (s <- right){
-      if (!other.getRight().contains(s)){
-        allThisRightInOther = false
-      }
-    }
-    return this.left == other.getLeft() && allOtherRightInThis && allThisRightInOther
+    return false
   }
 
   @Override
   override def toString: String = {
-    return left + ", " + right.toString() + " ||| "
+    return "[" + left + ", " + right.toString() + "] "
   }
 }
