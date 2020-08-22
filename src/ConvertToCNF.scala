@@ -18,7 +18,6 @@ object ConvertToCNF {
         val newRight = rule.getRight().filter(s => !subset.contains(s) && !s.equalsIgnoreCase("lambda"))
         rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
       }
-      //rulesInNewGrammar += new Rule(rule.getLeft(), rule.getRight().filter(s => !s.equalsIgnoreCase("lambda")))    // Adds the "whole" rule except if it is only lamda on the right-side
     }
     for (rule <- rulesInNewGrammar){    // This loop removes rules that does not have anything on the rightside
                                         // The rules happens when the subset in loop above is all of the variables on the rightside
@@ -28,6 +27,7 @@ object ConvertToCNF {
     }
 
     rulesInNewGrammar.foreach(r => print(r))
+    println("")
     return new Grammar(rulesInNewGrammar, grammar.getStartVariable())
   }
 

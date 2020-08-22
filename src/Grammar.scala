@@ -12,7 +12,7 @@ class Grammar(rules: Set[Rule], start:String) {
   override def equals(other: Any): Boolean = {
     other match {
       case other:Grammar => {
-        return other.getRules().subsetOf(rules) && rules.subsetOf(other.getRules())
+        return other.getRules().equals(rules) && other.getStartVariable().equals(start)
       }
     }
     return false
