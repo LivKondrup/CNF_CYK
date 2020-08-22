@@ -13,8 +13,8 @@ object ConvertToCNF {
     var rulesInNewGrammar = Set[Rule]()
 
     for (rule <- grammar.getRules()){
-      val nullableVariablesIterator:Iterator[Set[String]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   //List of all subsets of nullable variables in the right-side of the rule
-      for (subset <- nullableVariablesIterator){    // For all subsets
+      val nullableVariablesIterator:Iterator[Set[String]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   // Iterator of all subsets of nullable variables in the right-side of the rule
+      for (subset <- nullableVariablesIterator){    // For all subsets of relevant nullables
         val newRight = rule.getRight().filter(s => !subset.contains(s) && !s.equalsIgnoreCase("lambda"))
         rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
       }
