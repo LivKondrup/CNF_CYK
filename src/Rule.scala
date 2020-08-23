@@ -1,11 +1,14 @@
 class Rule(left: String, right: List[String]) {
-  private var isChainRule = right.size == 1
+  private var isChain = right.size == 1 && right(0).toUpperCase().equals(right(0))
 
   def getLeft():String = {
     return left
   }
   def getRight():List[String] = {
     return right
+  }
+  def isChainRule():Boolean = {
+    return isChain
   }
 
   @Override

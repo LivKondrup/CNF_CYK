@@ -71,7 +71,18 @@ object ConvertToCNF {
     return nullable
   }
 
-  def eliminateChains(grammar: Grammar):Grammar = ???
+  def eliminateChains(grammar: Grammar):Grammar = {
+    var newRules = Set[Rule]()
+    for (rule <- grammar.getRules()){
+      if(rule.isChainRule()){
+        ???
+      }
+      else {
+        newRules += rule
+      }
+    }
+    return new Grammar(newRules, grammar.getStartVariable())
+  }
 
   def fixRighSides(grammar: Grammar):Grammar = ???
 

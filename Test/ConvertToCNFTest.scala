@@ -41,4 +41,28 @@ class ConvertToCNFTest {
     val actualNullables = ConvertToCNF.findNullables(grammar1)
     assert(expectedNullables == actualNullables)
   }
+
+  @Test
+  def eliminateChainWorksWithOneChainRule(): Unit ={
+    val rule1 = new Rule("S", List("A", "B"))
+    val rule2 = new Rule("A", List("a", "A"))
+    val rule3 = new Rule("A", List("B"))
+    val rule4 = new Rule("B", List("b"))
+    val rule5 = new Rule("B", List("a", "b"))
+    val rules1 = Set(rule1, rule2, rule3, rule4)
+    val grammar1 = new Grammar(rules1, "S")
+    val grammar1Converted = ConvertToCNF.eliminateChains(grammar1)
+
+    val rule6 = new Rule("S", List("A", "B"))
+    val rule7 = new Rule("A", List("a", "A"))
+    val rule8 = new Rule("A", List("b"))
+    val rule9 = new Rule("A", List("a", "b"))
+    val rule10 = new Rule("B", List("b"))
+    val rule11 = new Rule("B", List("a", "b"))
+    val rules2 = Set(rule6, rule7, rule8, rule9, rule10, rule11)
+    val grammar1Expected = new Grammar(rules2, "S")
+
+    assert(grammar1Converted.equals(grammar1Expected))
+
+  }
 }
