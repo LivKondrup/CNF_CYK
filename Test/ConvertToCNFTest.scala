@@ -49,9 +49,9 @@ class ConvertToCNFTest {
     val rule3 = new Rule("A", List("B"))
     val rule4 = new Rule("B", List("b"))
     val rule5 = new Rule("B", List("a", "b"))
-    val rules1 = Set(rule1, rule2, rule3, rule4)
-    val grammar1 = new Grammar(rules1, "S")
-    val grammar1Converted = ConvertToCNF.eliminateChains(grammar1)
+    val rules1 = Set(rule1, rule2, rule3, rule4, rule5)
+    val grammar = new Grammar(rules1, "S")
+    val grammarConverted = ConvertToCNF.eliminateChains(grammar)
 
     val rule6 = new Rule("S", List("A", "B"))
     val rule7 = new Rule("A", List("a", "A"))
@@ -60,9 +60,42 @@ class ConvertToCNFTest {
     val rule10 = new Rule("B", List("b"))
     val rule11 = new Rule("B", List("a", "b"))
     val rules2 = Set(rule6, rule7, rule8, rule9, rule10, rule11)
-    val grammar1Expected = new Grammar(rules2, "S")
+    val grammarExpected = new Grammar(rules2, "S")
 
-    assert(grammar1Converted.equals(grammar1Expected))
+    grammarConverted.getRules().foreach(s => print(s))
+    println("")
+    grammarExpected.getRules().foreach(s => print(s))
 
+    assert(grammarConverted.equals(grammarExpected))
+
+  }
+
+  @Test
+  def eliminateChainWorksWithLongerChain(): Unit ={
+    val rule1 = new Rule("S", List("A", "B"))
+    val rule2 = new Rule("S", List("A"))
+    val rule3 = new Rule("A", List("a", "A"))
+    val rule4 = new Rule("A", List("B"))
+    val rule5 = new Rule("B", List("b"))
+    val rule6 = new Rule("B", List("a", "b"))
+    val rules1 = Set(rule1, rule2, rule3, rule4, rule5, rule6)
+    val grammar = new Grammar(rules1, "S")
+    val grammarConverted = ConvertToCNF.eliminateChains(grammar)
+
+    val rule10 = new Rule("S", List("A", "B"))
+    val rule11 = new Rule("S", List("a", "A"))
+    val rule12 = new Rule("S", List("b"))
+    val rule13 = new Rule("S", List("a", "b"))
+    val rule14 = new Rule("A", List("a", "A"))
+    val rule15 = new Rule("A", List("b"))
+    val rule16 = new Rule("A", List("a", "b"))
+    val rule17 = new Rule("B", List("b"))
+    val rule18 = new Rule("B", List("a", "b"))
+    val rules2 = Set(rule10, rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18)
+    val grammarExpected = new Grammar(rules2, "S")
+
+
+
+    assert(grammarConverted.equals(grammarExpected))
   }
 }

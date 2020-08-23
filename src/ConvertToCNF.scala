@@ -75,11 +75,35 @@ object ConvertToCNF {
     var newRules = Set[Rule]()
     for (rule <- grammar.getRules()){
       if(rule.isChainRule()){
-        ???
+        val rightVar = rule.getRight()(0)
+        val rulesFromRightVar = grammar.getRules().filter(r => r.getLeft().equals(rightVar))
+        for (r <- rulesFromRightVar){
+          newRules += new Rule(rule.getLeft(), r.getRight())
+        }
       }
       else {
         newRules += rule
       }
+    }
+    var chainRulesInNewRules = true
+    while(chainRulesInNewRules){
+      for(rule <- newRules){
+        if(rule.isChainRule()){
+          newRules -= rule
+          val rightVar = rule.getRight()(0)
+          val rulesFromRightVar = newRules.filter(r => r.getLeft().equals(rightVar))
+          for (r <- rulesFromRightVar){
+            newRules += new Rule(rule.getLeft(), r.getRight())
+          }
+        }
+      }
+      var t = false
+      for(rule <- newRules){
+        if (rule.isChainRule()){
+          t = true
+        }
+      }
+      chainRulesInNewRules = t
     }
     return new Grammar(newRules, grammar.getStartVariable())
   }
