@@ -62,10 +62,6 @@ class ConvertToCNFTest {
     val rules2 = Set(rule6, rule7, rule8, rule9, rule10, rule11)
     val grammarExpected = new Grammar(rules2, "S")
 
-    grammarConverted.getRules().foreach(s => print(s))
-    println("")
-    grammarExpected.getRules().foreach(s => print(s))
-
     assert(grammarConverted.equals(grammarExpected))
 
   }
@@ -94,7 +90,36 @@ class ConvertToCNFTest {
     val rules2 = Set(rule10, rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18)
     val grammarExpected = new Grammar(rules2, "S")
 
+    assert(grammarConverted.equals(grammarExpected))
+  }
 
+  @Test
+  def eliminateChainWorksForLoopingChains(): Unit ={
+    val rule12 = new Rule("S", List("A", "B"))
+    val rule13 = new Rule("S", List("A"))
+    val rule14 = new Rule("A", List("a", "A"))
+    val rule15 = new Rule("A", List("B"))
+    val rule16 = new Rule("B", List("b"))
+    val rule17 = new Rule("B", List("a", "b"))
+    val rule18 = new Rule("B", List("S"))
+    val rules1 = Set(rule12, rule13, rule14, rule15, rule16, rule17, rule18)
+    val grammar = new Grammar(rules1, "S")
+    val grammarConverted = ConvertToCNF.eliminateChains(grammar)
+
+    val rule0 = new Rule("S", List("A", "B"))
+    val rule1 = new Rule("S", List("a", "A"))
+    val rule2 = new Rule("S", List("b"))
+    val rule3 = new Rule("S", List("a", "b"))
+    val rule4 = new Rule("A", List("A", "B"))
+    val rule5 = new Rule("A", List("a", "A"))
+    val rule6 = new Rule("A", List("b"))
+    val rule7 = new Rule("A", List("a", "b"))
+    val rule8 = new Rule("B", List("A", "B"))
+    val rule9 = new Rule("B", List("a", "A"))
+    val rule10 = new Rule("B", List("b"))
+    val rule11 = new Rule("B", List("a", "b"))
+    val rules2 = Set(rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11)
+    val grammarExpected = new Grammar(rules2, "S")
 
     assert(grammarConverted.equals(grammarExpected))
   }

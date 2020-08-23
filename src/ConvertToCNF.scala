@@ -73,37 +73,40 @@ object ConvertToCNF {
 
   def eliminateChains(grammar: Grammar):Grammar = {
     var newRules = Set[Rule]()
-    for (rule <- grammar.getRules()){
-      if(rule.isChainRule()){
-        val rightVar = rule.getRight()(0)
-        val rulesFromRightVar = grammar.getRules().filter(r => r.getLeft().equals(rightVar))
+    for (rule <- grammar.getRules()){     // First run of finding new rules
+      if(rule.isChainRule()){     // If a rule is a chain, something special needs to happen, otherwise it is just added to the new grammar
+        val rightVar = rule.getRight()(0)   // If a rule is a chain rule, there is only one element in the right-side
+        val rulesFromRightVar = grammar.getRules().filter(r => r.getLeft().equals(rightVar))    // Set of all right-sides of rules with the right-side of the chain on the left
         for (r <- rulesFromRightVar){
-          newRules += new Rule(rule.getLeft(), r.getRight())
+          newRules += new Rule(rule.getLeft(), r.getRight())    // Adding all rules that has the right of the chain-rule on the left
         }
       }
       else {
         newRules += rule
       }
     }
+    // At this point the list of rules could still have chain rules
+    // This would happen if a chain goes over multiple variables
     var chainRulesInNewRules = true
-    while(chainRulesInNewRules){
-      for(rule <- newRules){
-        if(rule.isChainRule()){
-          newRules -= rule
+    while(chainRulesInNewRules){    //While there are still chain rules in the list
+      for(rule <- newRules){    // Go through all of the rules
+        if(rule.isChainRule()){   // If a rule is a chain rule
+          newRules -= rule      // It is removed form the list
           val rightVar = rule.getRight()(0)
-          val rulesFromRightVar = newRules.filter(r => r.getLeft().equals(rightVar))
+          val rulesFromRightVar = newRules.filter(r => r.getLeft().equals(rightVar))    // The right-sides of rules are found in the updated set, not the original
           for (r <- rulesFromRightVar){
-            newRules += new Rule(rule.getLeft(), r.getRight())
+            newRules += new Rule(rule.getLeft(), r.getRight())    // The rules to replace the chain rule is added
           }
         }
       }
-      var t = false
+      // At this point there could still be chain rules, this is checked and update the chainRulesInNewRules
+      var stillChainRules = false
       for(rule <- newRules){
         if (rule.isChainRule()){
-          t = true
+          stillChainRules = true
         }
       }
-      chainRulesInNewRules = t
+      chainRulesInNewRules = stillChainRules
     }
     return new Grammar(newRules, grammar.getStartVariable())
   }
