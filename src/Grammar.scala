@@ -1,10 +1,10 @@
-class Grammar(rules: Set[Rule], start:String) {
+class Grammar(rules: Set[Rule], start:NonTerminal) {
 
   def getRules(): Set[Rule] ={
     return rules
   }
 
-  def getStartVariable(): String ={
+  def getStartVariable(): NonTerminal ={
     return start
   }
 

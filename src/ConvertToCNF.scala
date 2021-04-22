@@ -10,13 +10,14 @@ object ConvertToCNF {
   }
 
   def eliminateLambda(grammar:Grammar):Grammar = {
-    val nullable: Set[String] = findNullables(grammar)
+    val nullable: Set[RuleElement] = findNullables(grammar)
     var rulesInNewGrammar = Set[Rule]()
 
+    // This loop creates new rules such that all combinations of having a nullable variable or not is in the the grammar
     for (rule <- grammar.getRules()){
-      val nullableVariablesIterator:Iterator[Set[String]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   // Iterator of all subsets of nullable variables in the right-side of the rule
+      val nullableVariablesIterator:Iterator[Set[RuleElement]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   // Iterator of all subsets of nullable variables in the right-side of the rule
       for (subset <- nullableVariablesIterator){    // For all subsets of relevant nullables
-        val newRight = rule.getRight().filter(s => !subset.contains(s) && !s.equalsIgnoreCase("lambda"))
+        val newRight = rule.getRight().filter(s => !subset.contains(s) && s.isInstanceOf[Lambda]) // New right is the old rights, but without the variables in the current subset and without lambda
         rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
       }
     }
@@ -29,29 +30,24 @@ object ConvertToCNF {
     new Grammar(rulesInNewGrammar, grammar.getStartVariable())
   }
 
-  def findNullables(grammar: Grammar): Set[String] = {
+  def findNullables(grammar: Grammar): Set[RuleElement] = {
     findNullableVariables(grammar, findLambdaVariables(grammar))
   }
 
-  def findLambdaVariables(grammar: Grammar):Set[String] = {
-    var nullable: Set[String] = Set()   // To maintain the list of nullables
+  def findLambdaVariables(grammar: Grammar):Set[RuleElement] = {
+    var nullable: Set[RuleElement] = Set()   // To maintain the list of nullables
     // Finds all variables that can lead to lambda
     for (rule <- grammar.getRules()){    // Going through all rules in the grammar
-      var rightIsLambda = true    // Maintains if all of the symbols in the right-sides so far is lambda
-      for (symbol <- rule.getRight()){    // Goes through all right-side symbols of a rule
-        if (!symbol.equalsIgnoreCase("lambda")){    // If a symbol on the right is different from lambda, then the right is not only lambda
-          rightIsLambda = false
-        }
-      }
-      if (rightIsLambda){   // If all right-sides of a rule was lambda then the variable on the left is nullable and should be added ti the list of nullables
+      var rightIsLambda = rule.getRight().contains("lambda")    // Does the variable lead directly to a lambda
+      if (rightIsLambda){   // If all right-sides of a rule was lambda then the variable on the left is nullable and should be added to the list of nullables
         nullable += rule.getLeft()
       }
     }
     nullable
   }
 
-  def findNullableVariables(grammar: Grammar, lambdaVariables:Set[String]):Set[String] = {
-    var nullable:Set[String] = lambdaVariables
+  def findNullableVariables(grammar: Grammar, lambdaVariables:Set[RuleElement]):Set[RuleElement] = {
+    var nullable:Set[RuleElement] = lambdaVariables
     // Finds all other nullable variables
     var nullableChanged = true    // Is true if the list of nullables have changed after the last time of going through the entire grammar
     while (nullableChanged){
@@ -112,6 +108,37 @@ object ConvertToCNF {
     new Grammar(newRules, grammar.getStartVariable())
   }
 
-  def fixRightSides(grammar: Grammar):Grammar = ???
+  def fixRightSides(grammar: Grammar):Grammar = {   // Input: a grammar with no lambdas and chain rules, Output: A grammar on CNF
+    /*for (rule <- grammar.getRules()){
+      val ruleIsToASingleTerminal = (rule.getRight().size ==1 && rule.getRight()(0)==rule.getRight()(0).toLowerCase())
+      val ruleIsToTwoNonterminals = ???
+      if (!ruleIsToASingleTerminal){   // If the rule is not a non terminal -> single terminal
+
+      }
+    }*/
+    return null
+  }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

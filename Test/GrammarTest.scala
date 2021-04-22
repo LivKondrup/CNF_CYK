@@ -3,13 +3,13 @@ import org.junit.jupiter.api.{BeforeEach, Test}
 class GrammarTest {
   @Test
   def equalWorksCorrect(): Unit ={
-    val rule1 = new Rule("S", List("a", "A"))
-    val rule2 = new Rule("A", List("a", "B"))
-    val grammar1:Grammar = new Grammar(Set(rule1, rule2), "S")
+    val rule1 = new Rule(new NonTerminal("S"), List(new Terminal("a"), new NonTerminal("A")))
+    val rule2 = new Rule(new NonTerminal("A"), List(new Terminal("a"), new NonTerminal("B")))
+    val grammar1:Grammar = new Grammar(Set(rule1, rule2), new NonTerminal("S"))
 
-    val rule3 = new Rule("S", List("a", "A"))
-    val rule4 = new Rule("A", List("a", "B"))
-    val grammar2:Grammar = new Grammar(Set(rule4, rule3), "S")
+    val rule3 = new Rule(new NonTerminal("S"), List(new Terminal("a"), new NonTerminal("A")))
+    val rule4 = new Rule(new NonTerminal("A"), List(new Terminal("a"), new NonTerminal("B")))
+    val grammar2:Grammar = new Grammar(Set(rule4, rule3), new NonTerminal("S"))
 
     assert(grammar1.equals(grammar2))
   }

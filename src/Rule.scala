@@ -1,10 +1,11 @@
-class Rule(left: String, right: List[String]) {
-  private var isChain = right.size == 1 && right(0).toUpperCase().equals(right(0))
 
-  def getLeft():String = {
+class Rule(left: NonTerminal, right: List[RuleElement]) {
+  private var isChain = right.size == 1 && right(0).isInstanceOf[NonTerminal]
+
+  def getLeft():NonTerminal = {
     return left
   }
-  def getRight():List[String] = {
+  def getRight():List[RuleElement] = {
     return right
   }
   def isChainRule():Boolean = {
@@ -23,7 +24,7 @@ class Rule(left: String, right: List[String]) {
 
   @Override
   override def toString: String = {
-    return "[" + left + ", " + right.toString() + "] "
+    return "[" + left.getName() + ", " + right.toString() + "] "
   }
 
   @Override
