@@ -1,4 +1,8 @@
 class Grammar(rules: Set[Rule], start:NonTerminal) {
+  def isCNF(): Boolean = {
+    return !rules.exists(rule => !rule.isOnCNF())
+  }
+
 
   def getRules(): Set[Rule] ={
     return rules
