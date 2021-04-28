@@ -112,6 +112,92 @@ object ConvertToCNF {
     new Grammar(newRules, grammar.getStartVariable())
   }
 
+  def renameTerminals(tempRules: Set[Rule], newRules: Set[Rule]): (Set[Rule], Set[Rule]) ={
+    var updatedTempRules = tempRules
+    var updatedNewRules = newRules
+    for (rule <- tempRules) {
+      // For each ruleElem: If it is a terminal, create a new rule (or check if one already exists)
+      for (elem <- rule.getRight()) {
+        if (elem.isInstanceOf[Terminal]) {
+          // check if a rule already has the single terminal on the right
+          // If not, create such a rule with a fresh Variable and add it to newRules and change the current rule in tempRules to use it instead of the terminal
+
+          // Check if there is a terminal rule with elem as the right side
+          val usefulTerminalRuleAlreadyExists = updatedNewRules.exists(rule => rule.getRight().size == 1 && rule.getRight()(0).equals(elem))
+          var usefulTerminalRule: Rule = null
+          if (usefulTerminalRuleAlreadyExists) {
+            //  The useful rule
+            usefulTerminalRule = updatedNewRules.filter(rule => rule.getRight().size == 1 && rule.getRight()(0).equals(elem)).head
+          }
+          else {
+            val freshNonTerminal = getFreshNonTerminal() // Create a new variable for the left side of the new rule
+            usefulTerminalRule = new Rule(freshNonTerminal, ListBuffer(elem)) // Create the new rule
+          }
+          // Remove the old version of the rule
+          updatedTempRules -= rule
+
+          // Update all occurences of elem with the replacement
+          val newRightsides = rule.getRight().map { case elem => usefulTerminalRule.getLeft(); case x => x }
+          // Create the updated rule
+          val updatedRule = new Rule(rule.getLeft(), newRightsides)
+          // Add the updated rule to temp rules
+          updatedTempRules += updatedRule
+        }
+      }
+    }
+    return (updatedTempRules, updatedNewRules)
+  }
+
+  def simplifyRules(tempRules: Set[Rule], newRules: Set[Rule], grammar: Grammar): (Set[Rule], Set[Rule]) = {
+    var updatedTempRules = tempRules
+    var updatedNewRules = newRules
+
+    // While there are still rules that are not on CNF (Rules are moved from tempRules to newRules once they are on cnf)
+    while (updatedTempRules.nonEmpty) {
+      // Move rules that are on CNF to newRules
+      for (rule <- updatedTempRules){
+        if (rule.isOnCNF()){
+          updatedTempRules -= rule
+          updatedNewRules += rule
+        }
+      }
+
+      // If the grammar is on CNF, stop
+      if (grammar.isCNF()){
+        break
+      }
+
+      // Combine the two first variables on the right side to a new rule
+      for (rule <- updatedTempRules){
+        // Check if the wanted rule already exists
+        val usefulRuleAlreadyExists = updatedNewRules.exists(rule2 => rule2.getRight().equals(ListBuffer(rule.getRight()(0), rule.getRight()(1))))
+        var usefulRule:Rule = null
+        if (usefulRuleAlreadyExists){
+          // Find the useful rule
+          usefulRule = updatedNewRules.filter(rule2 => rule2.getRight().equals(ListBuffer(rule.getRight()(0), rule.getRight()(1)))).head
+        }
+        else{
+          // Create a useful rule
+          usefulRule = new Rule (getFreshNonTerminal(), ListBuffer(rule.getRight().head, rule.getRight()(0)))
+        }
+        // Remove the old version of the rule
+        updatedTempRules -= rule
+
+        // Make the new right-side
+        val updatedRightSide = rule.getRight()
+        updatedRightSide.remove(0,1)
+        updatedRightSide.prepend(usefulRule.getLeft())
+
+        // Make the new rule
+        val newRule = new Rule(rule.getLeft(), updatedRightSide)
+
+        // Add the updated rule to the temp rules (This could technically now be on cnf, but if it is we move it in the next iteration)
+        updatedTempRules += newRule
+      }
+    }
+    (updatedTempRules, updatedNewRules)
+  }
+
   def getFreshNonTerminal(): NonTerminal = {
     return new NonTerminal(Random.nextString(5))
   }     // TODO: How to find a string not already in use
@@ -124,72 +210,15 @@ object ConvertToCNF {
     var tempRules = grammar.getRules().filter(rule => !rule.isOnCNF())
 
     // Update all rules such that terminals become non-terminals
-    for (rule <- tempRules) {
-      // For each ruleElem: If it is a terminal, create a new rule (or check if one already exists)
-      for (elem <- rule.getRight()) {
-        if (elem.isInstanceOf[Terminal]) {
-          // check if a rule already has the single terminal on the right
-          // If not, create such a rule with a fresh Variable and add it to newRules and change the current rule in tempRules to use it instead of the terminal
-          val terminalRuleAlreadyExistsInNew = newRules.exists(rule => rule.getRight().size == 1 && rule.getRight()(0).equals(elem)) // Check if there is a terminal rule with elem as the right side
-          if (terminalRuleAlreadyExistsInNew) {
-            tempRules -= rule // Remove the already existing rule
-            val terminalRuleLeft = rule.getLeft() //  The replacement for elem
-            val newRightsides = rule.getRight().map { case elem => terminalRuleLeft; case x => x } // Update all occurences of elem with the replacement
-            val updatedRule = new Rule(rule.getLeft(), newRightsides) // Update the temp rules with
-            tempRules += updatedRule // Add the updated rule
-          }
-          else {
-            tempRules -= rule // Remove the already existing rule
-            val freshNonTerminal = getFreshNonTerminal() // Create a new variable for the left side of the new rule
-            val terminalRule = new Rule(freshNonTerminal, ListBuffer(elem)) // Create the new rule
-            newRules += terminalRule // Add the new rule to the finished cnf rules
-            val newRightsides = rule.getRight().map { case elem => freshNonTerminal; case x => x } // Update the temp rule to use the new variable instead of elem
-            val updatedRule = new Rule(rule.getLeft(), newRightsides)
-            tempRules += updatedRule
-          }
-        }
-      }
-    }
+    val terminalsRemoved = renameTerminals(tempRules, newRules)
+    tempRules = terminalsRemoved._1
+    newRules = terminalsRemoved._2
 
-    while (tempRules.nonEmpty) {
-      // Now all rules in temp rules should have only non-terminals
-      // Go through and add the ones that are now on cnf to newRules
-      for (rule <- tempRules){
-        if (rule.isOnCNF()){
-          tempRules -= rule
-          newRules += rule
-        }
-      }
+    // Finish the conversion by renaming and creating new rules
+    val simplifiedRules = simplifyRules(tempRules, newRules, grammar)
+    tempRules = simplifiedRules._1
+    newRules = simplifiedRules._2
 
-      if (grammar.isCNF()){
-        break
-      }
-
-      // Combine the two first variables on the right side to a new rule
-      for (rule <- tempRules){
-        // Check if the wanted rule already exists
-        val usefulRuleAlreadyExists = newRules.exists(rule2 => rule2.getRight().equals(ListBuffer(rule.getRight()(0), rule.getRight()(1))))
-        if (usefulRuleAlreadyExists){
-          // update the temp rule
-          val usefulRule = newRules.filter(rule2 => rule2.getRight().equals(ListBuffer(rule.getRight()(0), rule.getRight()(1)))).head
-          tempRules -= rule
-          var updatedRightSide = rule.getRight()
-          updatedRightSide.remove(0,1)
-          updatedRightSide.prepend(usefulRule.getLeft())
-          tempRules += new Rule(rule.getLeft(), updatedRightSide)
-        }
-        else{
-          // Create such a rule
-          val usefulRule = new Rule (getFreshNonTerminal(), ListBuffer(rule.getRight().head, rule.getRight()(0)))
-          // update the temp rule
-          tempRules -= rule
-          var updatedRightSide = rule.getRight()
-          updatedRightSide.remove(0,1)
-          updatedRightSide.prepend(usefulRule.getLeft())
-          tempRules += new Rule(rule.getLeft(), updatedRightSide)
-        }
-      }
-    }
     return new Grammar(newRules, grammar.getStartVariable())
   }
 
