@@ -41,7 +41,7 @@ object ConvertToCNF {
     var nullable: Set[RuleElement] = Set()   // To maintain the list of nullables
     // Finds all variables that can lead to lambda
     for (rule <- grammar.getRules()){    // Going through all rules in the grammar
-      var rightIsLambda = rule.getRight().contains("lambda")    // Does the variable lead directly to a lambda
+      val rightIsLambda = rule.getRight().contains(new Lambda())  // Does the variable lead directly to a lambda
       if (rightIsLambda){   // If all right-sides of a rule was lambda then the variable on the left is nullable and should be added to the list of nullables
         nullable += rule.getLeft()
       }

@@ -25,10 +25,10 @@ class ConvertToCNFTest {
     val rule12:Rule = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("b")))
 
     val rules2: Set[Rule] = Set(rule6, rule7, rule8, rule9, rule10, rule11, rule12)
-    val grammar2: Grammar = new Grammar(rules2, new NonTerminal("S")) // How the grammar should look after being converted
-    val grammar3 = ConvertToCNF.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
+    val grammarExpected: Grammar = new Grammar(rules2, new NonTerminal("S"))
+    val grammarConverted = ConvertToCNF.eliminateLambda(grammar1)
 
-    assert(grammar3.equals(grammar2))
+    assert(grammarConverted.equals(grammarExpected))
   }
 
   @Test def grammarHasChanged(): Unit = {
@@ -39,8 +39,9 @@ class ConvertToCNFTest {
 
   @Test
   def findAllNullableVaribles(): Unit ={
-    val expectedNullables = Set("S", "A", "B")
+    val expectedNullables = Set(new NonTerminal("S"), new NonTerminal("A"), new NonTerminal("B"))
     val actualNullables = ConvertToCNF.findNullables(grammar1)
+    print(actualNullables)
     assert(expectedNullables == actualNullables)
   }
 
@@ -64,7 +65,17 @@ class ConvertToCNFTest {
     val rules2 = Set(rule6, rule7, rule8, rule9, rule10, rule11)
     val grammarExpected = new Grammar(rules2, new NonTerminal("S"))
 
-    assert(grammarConverted.equals(grammarExpected))
+    assert(grammarConverted.getRules().equals(grammarExpected.getRules()))
+
+    /*assert(grammarConverted.getRules().size == grammarExpected.getRules().size)
+
+    for (rule <- grammarConverted.getRules()){
+      println(rule)
+      for (rule2 <- grammarExpected.getRules()){
+        println(rule2)
+        println(rule.equals(rule2))
+      }
+    }*/
 
   }
 
@@ -91,8 +102,10 @@ class ConvertToCNFTest {
     val rule18 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new Terminal("b")))
     val rules2 = Set(rule10, rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18)
     val grammarExpected = new Grammar(rules2, new NonTerminal("S"))
+    val grammarExp2 = new Grammar(rules2, NonTerminal("S"))
 
     assert(grammarConverted.equals(grammarExpected))
+
   }
 
   @Test

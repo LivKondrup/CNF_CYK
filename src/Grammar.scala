@@ -15,12 +15,12 @@ class Grammar(rules: Set[Rule], start:NonTerminal) {
   @Override
   override def equals(other: Any): Boolean = {
     other match {
-      case other:Grammar => {
-        val setOfRulesAreTheSame = other.getRules().equals(rules)
-        val startvariablesAreTheSame = other.getStartVariable().equals(start)
-        return setOfRulesAreTheSame && startvariablesAreTheSame
-      }
+      case other:Grammar =>
+        val a = getRules().equals(other.getRules())
+        val b = getStartVariable().equals(other.getStartVariable())
+        a && b
+      case _ => false
     }
-    return false
   }
 }
+

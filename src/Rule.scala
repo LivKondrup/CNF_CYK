@@ -22,11 +22,12 @@ class Rule(left: NonTerminal, right: ListBuffer[RuleElement]) {
   @Override
   override def equals(other:Any):Boolean = {
     other match{
-      case other:Rule =>{
-        return this.left.equals(other.getLeft()) && this.right.equals(other.getRight())
-      }
+      case other:Rule =>
+        val a = left.equals(other.getLeft())
+        val b = right.equals(other.getRight())
+        a && b
+      case _ => false
     }
-    return false
   }
 
   @Override
@@ -34,8 +35,8 @@ class Rule(left: NonTerminal, right: ListBuffer[RuleElement]) {
     return "[" + left.getName() + ", " + right.toString() + "] "
   }
 
-  /*@Override
+  @Override
   override def hashCode(): Int = {      // Is this hashcode good enough???
-    return (left.hashCode().toString + (right.hashCode().abs/1000).toString).toInt
-  }*/
+    return (left.hashCode().toString.slice(0,5) + (right.hashCode().abs).toString.slice(0,5)).toInt
+  }
 }

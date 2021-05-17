@@ -1,3 +1,3 @@
-trait RuleElement {
+abstract class RuleElement {
   def getName(): String
 }
