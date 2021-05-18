@@ -20,7 +20,7 @@ object ConvertToCNF {
     for (rule <- grammar.getRules()){
       val nullableVariablesIterator:Iterator[Set[RuleElement]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   // Iterator of all subsets of nullable variables in the right-side of the rule
       for (subset <- nullableVariablesIterator){    // For all subsets of relevant nullables
-        val newRight = rule.getRight().filter(s => !subset.contains(s) && s.isInstanceOf[Lambda]) // New right is the old rights, but without the variables in the current subset and without lambda
+        val newRight = rule.getRight().filter(s => !subset.contains(s) && !(s.isInstanceOf[Lambda])) // New right is the old rights, but without the variables in the current subset and without lambda
         rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
       }
     }
@@ -162,15 +162,10 @@ object ConvertToCNF {
         }
       }
 
-      // If the grammar is on CNF, stop
-      if (grammar.isCNF()){
-        break
-      }
-
       // Combine the two first variables on the right side to a new rule
       for (rule <- updatedTempRules){
         // Check if the wanted rule already exists
-        val usefulRuleAlreadyExists = updatedNewRules.exists(rule2 => rule2.getRight().equals(ListBuffer(rule.getRight()(0), rule.getRight()(1))))
+        val usefulRuleAlreadyExists = false //updatedNewRules.exists(rule2 => rule2.getRight().equals(ListBuffer(rule.getRight()(0), rule.getRight()(1))))
         var usefulRule:Rule = null
         if (usefulRuleAlreadyExists){
           // Find the useful rule
@@ -178,14 +173,14 @@ object ConvertToCNF {
         }
         else{
           // Create a useful rule
-          usefulRule = new Rule (getFreshNonTerminal(), ListBuffer(rule.getRight().head, rule.getRight()(0)))
+          usefulRule = new Rule (getFreshNonTerminal(), ListBuffer(rule.getRight().head, rule.getRight()(1)))
         }
         // Remove the old version of the rule
         updatedTempRules -= rule
 
         // Make the new right-side
         val updatedRightSide = rule.getRight()
-        updatedRightSide.remove(0,1)
+        updatedRightSide.remove(0,2)
         updatedRightSide.prepend(usefulRule.getLeft())
 
         // Make the new rule

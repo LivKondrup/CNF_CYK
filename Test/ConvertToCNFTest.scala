@@ -28,6 +28,9 @@ class ConvertToCNFTest {
     val grammarExpected: Grammar = new Grammar(rules2, new NonTerminal("S"))
     val grammarConverted = ConvertToCNF.eliminateLambda(grammar1)
 
+    println(grammarConverted.getRules())
+    println(grammarExpected.getRules())
+
     assert(grammarConverted.equals(grammarExpected))
   }
 
@@ -66,17 +69,6 @@ class ConvertToCNFTest {
     val grammarExpected = new Grammar(rules2, new NonTerminal("S"))
 
     assert(grammarConverted.getRules().equals(grammarExpected.getRules()))
-
-    /*assert(grammarConverted.getRules().size == grammarExpected.getRules().size)
-
-    for (rule <- grammarConverted.getRules()){
-      println(rule)
-      for (rule2 <- grammarExpected.getRules()){
-        println(rule2)
-        println(rule.equals(rule2))
-      }
-    }*/
-
   }
 
   @Test
@@ -140,7 +132,7 @@ class ConvertToCNFTest {
   }
 
   @Test
-  def fixRightHandSides(): Unit = {
+  def getOnCNFWorks(): Unit = {
     val rule0 = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A"), new NonTerminal("B"), new NonTerminal("C")))
     val rule1 = new Rule(new NonTerminal("S"), ListBuffer(new Terminal("a"), new NonTerminal("A")))
     val rule2 = new Rule(new NonTerminal("S"), ListBuffer(new Terminal("b")))
@@ -167,7 +159,15 @@ class ConvertToCNFTest {
         assert(rightSide(1).isInstanceOf[NonTerminal])
       }
     }
-   }
+  }
 
+  @Test
+  def fixRightSideWorks(): Unit = {
+    val rule0 = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A"), new NonTerminal("B"), new NonTerminal("C")))
+//    val rule5 = new Rule(new NonTerminal("A"), ListBuffer(new Terminal("a"), new NonTerminal("A")))
+//   val rule11 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("b")))
+    val rules2 = Set(rule0)
+    val grammar = ConvertToCNF.fixRightSides(new Grammar(rules2, new NonTerminal("S")))
+  }
 
 }
