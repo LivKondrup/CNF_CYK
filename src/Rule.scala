@@ -15,7 +15,7 @@ class Rule(left: NonTerminal, right: ListBuffer[RuleElement]) {
 
   def isOnCNF(): Boolean = {
     val ruleIsToASingleTerminal = (getRight().size==1 && getRight()(0).isInstanceOf[Terminal])
-    val ruleIsToTwoNonterminals = getRight().size==2 && getRight()(0).isInstanceOf[NonTerminal]
+    val ruleIsToTwoNonterminals = getRight().size==2 && getRight()(0).isInstanceOf[NonTerminal] && getRight()(1).isInstanceOf[NonTerminal]
     return ruleIsToASingleTerminal || ruleIsToTwoNonterminals
   }
 
@@ -37,6 +37,6 @@ class Rule(left: NonTerminal, right: ListBuffer[RuleElement]) {
 
   @Override
   override def hashCode(): Int = {      // Is this hashcode good enough???
-    return (left.hashCode().toString.slice(0,5) + (right.hashCode().abs).toString.slice(0,5)).toInt
+    return (left.hashCode().toString.slice(0,5) + (right.hashCode().abs).toString.slice(0,4)).toInt
   }
 }

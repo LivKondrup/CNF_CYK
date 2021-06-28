@@ -1,4 +1,14 @@
+import scala.collection.mutable.ListBuffer
+
 class Grammar(rules: Set[Rule], start:NonTerminal) {
+  def hasNonTerminal(letter: NonTerminal): Boolean = {
+    for (rule <- rules){
+      if (rule.getLeft().equals(letter)) return true
+      //if (rule.getRight().exists(term => rule.getLeft().equals(term))) return true
+    }
+    return false
+  }
+
   def isCNF(): Boolean = {
     return !rules.exists(rule => !rule.isOnCNF())
   }
@@ -20,6 +30,18 @@ class Grammar(rules: Set[Rule], start:NonTerminal) {
         val b = getStartVariable().equals(other.getStartVariable())
         a && b
       case _ => false
+    }
+  }
+
+  def printGrammar(): Unit = {
+    println("starting: ", start)
+    for (rule <- rules){
+      print(rule.getLeft().getName() + " -> ")
+      for(rule2 <- rules){
+        if(rule.getLeft().equals(rule2.getLeft())){
+          print(rule2.getRight())
+        }
+      }
     }
   }
 }

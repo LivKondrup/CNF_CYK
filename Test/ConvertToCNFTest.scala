@@ -145,7 +145,8 @@ class ConvertToCNFTest {
     val rule9 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new NonTerminal("A")))
     val rule10 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("b")))
     val rule11 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new Terminal("b")))
-    val rules2 = Set(rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11)
+    val rule12 = new Rule(new NonTerminal("C"), ListBuffer(new Terminal("b")))
+    val rules2 = Set(rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11, rule12)
     val grammar = ConvertToCNF.getGrammarOnCNF(new Grammar(rules2, new NonTerminal("S")))
 
     for (rule <- grammar.getRules()){
