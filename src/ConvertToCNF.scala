@@ -89,7 +89,6 @@ object ConvertToCNF {
     // At this point the list of rules could still have chain rules
     // This would happen if a chain goes over multiple variables
     var chainRulesInNewRules = true
-    // TODO: make sure this while-loop terminates
     while(chainRulesInNewRules){    //While there are still chain rules in the list
       for(rule <- newRules){    // Go through all of the rules
         if(rule.isChainRule()){   // If a rule is a chain rule
@@ -196,7 +195,6 @@ object ConvertToCNF {
       for(letter2 <- alphabet){
         val newNonTerminal = NonTerminal(letter+letter2)
         if (!grammar.hasNonTerminal(newNonTerminal)){
-          println(newNonTerminal)
           return newNonTerminal
         }
       }
