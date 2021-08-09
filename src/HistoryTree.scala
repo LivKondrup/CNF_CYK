@@ -1,5 +1,7 @@
+import scala.collection.mutable.ListBuffer
+
 sealed abstract class HistoryTree
-case object Top extends HistoryTree
-case class HistoryTreeNode(elem: Rule, parent: HistoryTree = Top, step: Int) extends HistoryTree
+case object Leaf extends HistoryTree
+case class HistoryTreeNode(elem: Rule, children: ListBuffer[HistoryTree], step: Int) extends HistoryTree
 
 
