@@ -15,7 +15,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) {
       ???     // The tree does not exist
     }
     historyTrees-=tree
-    val newTree = createNewRule(tree, oldRule, newRule)
+    val newTree = createNewRule(tree, oldRule, newRule, step)
     historyTrees+=newTree
 
   }
@@ -60,6 +60,10 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) {
         return HistoryTreeNode(rule, newChildren, stepOld)
       case Leaf => return tree
     }
+  }
+
+  def getHistoryTrees(): ListBuffer[HistoryTree] = {
+    return historyTrees
   }
 
 }
