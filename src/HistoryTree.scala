@@ -1,9 +1,5 @@
-class HistoryTree(initialRule: Rule){
-  private val top = new HistoryNode(initialRule, ???, 0)
-  private var nodes: Set[HistoryNode] = Set(top)
+sealed abstract class HistoryTree
+case object Top extends HistoryTree
+case class HistoryTreeNode(elem: Rule, parent: HistoryTree = Top, step: Int) extends HistoryTree
 
-  def addChild(rule: Rule, parentRule: Rule, step: Int): Unit = {
-    val parent = nodes.find(p => p.getRule() == parentRule).get     // Can throw exception if the parent is not already in the tree
-    nodes = nodes + new HistoryNode(rule, parent, step)
-  }
-}
+

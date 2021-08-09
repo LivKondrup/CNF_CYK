@@ -19,18 +19,14 @@ object ConvertToCNF {
 
     // This loop creates new rules such that all combinations of having a nullable variable or not is in the the grammar
     for (rule <- grammar.getRules()){
-      val nullableVariablesIterator:Iterator[Set[RuleElement]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   // Iterator of all subsets of nullable variables in the right-side of the rule
+      val nullableVariablesIterator:Iterator[Set[RuleElement]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   // Iterator of all subsets of nullable variables in the right-side of the current rule
       for (subset <- nullableVariablesIterator){    // For all subsets of relevant nullables
-        val newRight = rule.getRight().filter(s => !subset.contains(s) && !(s.isInstanceOf[Lambda])) // New right is the old rights, but without the variables in the current subset and without lambda
+        val newRight = rule.getRight().filter(s => !subset.contains(s) && !s.isInstanceOf[Lambda]) // New right is the old rights, but without the variables in the current subset and without lambda
         rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
       }
     }
-    for (rule <- rulesInNewGrammar){    // This loop removes rules that does not have anything on the right-side
-                                        // The rules happens when the subset in loop above is all of the variables on the right-side
-      if (rule.getRight().isEmpty){
-        rulesInNewGrammar = rulesInNewGrammar - rule
-      }
-    }
+    rulesInNewGrammar = rulesInNewGrammar.filter(rule => rule.getRight().nonEmpty)  // This removes rules that does not have anything on the right-side this happens when the subset in loop above is all of the variables on the right-side
+
     new Grammar(rulesInNewGrammar, grammar.getStartVariable())
   }
 
@@ -42,7 +38,7 @@ object ConvertToCNF {
     var nullable: Set[RuleElement] = Set()   // To maintain the list of nullables
     // Finds all variables that can lead to lambda
     for (rule <- grammar.getRules()){    // Going through all rules in the grammar
-      val rightIsLambda = rule.getRight().contains(new Lambda())  // Does the variable lead directly to a lambda
+      val rightIsLambda = rule.getRight().contains(Lambda())  // Does the variable lead directly to a lambda
       if (rightIsLambda){   // If all right-sides of a rule was lambda then the variable on the left is nullable and should be added to the list of nullables
         nullable += rule.getLeft()
       }

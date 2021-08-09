@@ -3,6 +3,7 @@ import scala.collection.mutable.ListBuffer
 class Rule(left: NonTerminal, right: ListBuffer[RuleElement]) {
   private var isChain = right.size == 1 && right(0).isInstanceOf[NonTerminal]
 
+
   def getLeft():NonTerminal = {
     return left
   }
