@@ -17,7 +17,7 @@ class MoreTests {
     val rule6 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b"), NonTerminal("S")))
     val rule7 = new Rule(NonTerminal("B"), ListBuffer(Terminal("a"), NonTerminal("B"), NonTerminal("B")))
     val grammarOriginal = new Grammar(Set(rule1, rule2, rule3, rule4, rule5, rule6, rule7), NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal)
+    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal, new NoUpdatingBuilder())
     assert(grammarConverted.getRules().size >= 12)
   }
 
@@ -30,7 +30,7 @@ class MoreTests {
     val rule5 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
 
     val grammarOriginal = new Grammar(Set(rule1, rule2, rule3, rule4, rule5), NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal)
+    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal, new NoUpdatingBuilder())
 
     val rule6 = new Rule(NonTerminal("S"), ListBuffer(Terminal("a")))
     val rule7 = new Rule(NonTerminal("S"), ListBuffer(Terminal("b")))
@@ -52,7 +52,7 @@ class MoreTests {
     val rule3 = new Rule(NonTerminal("S"), ListBuffer(Terminal("b"), NonTerminal("S")))
 
     val grammarOriginal = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal)
+    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal, new NoUpdatingBuilder())
     assert(grammarConverted.getRules().size == 6)
   }
 
@@ -63,7 +63,7 @@ class MoreTests {
     val rule3 = new Rule(NonTerminal("S"), ListBuffer(Terminal("a")))
 
     val grammarOriginal = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal)
+    val grammarConverted = ConvertToCNF.getGrammarOnCNF(grammarOriginal, new NoUpdatingBuilder())
     assert(grammarConverted.getRules().size == 4)
   }
 

@@ -5,7 +5,7 @@ import scala.util.Random
 import scala.util.control.Breaks.{break, breakable}
 
 object ConvertToCNF {
-  def getGrammarOnCNF(grammar: Grammar):Grammar = {
+  def getGrammarOnCNF(grammar: Grammar, historyTreeBuilder: RuleUpdatingBuilder):Grammar = {
     var convertedGrammar = grammar
     convertedGrammar = eliminateLambda(convertedGrammar)
     convertedGrammar = eliminateChains(convertedGrammar)
@@ -23,6 +23,7 @@ object ConvertToCNF {
       for (subset <- nullableVariablesIterator){    // For all subsets of relevant nullables
         val newRight = rule.getRight().filter(s => !subset.contains(s) && !s.isInstanceOf[Lambda]) // New right is the old rights, but without the variables in the current subset and without lambda
         rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
+
       }
     }
     rulesInNewGrammar = rulesInNewGrammar.filter(rule => rule.getRight().nonEmpty)  // This removes rules that does not have anything on the right-side this happens when the subset in loop above is all of the variables on the right-side

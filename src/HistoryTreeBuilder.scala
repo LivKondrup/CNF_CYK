@@ -1,6 +1,6 @@
 import scala.collection.mutable.ListBuffer
 
-class HistoryTreeBuilder(var originalGrammar: Grammar) {
+class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuilder {
 
   // maintain a list of all historyTrees
   var historyTrees = new ListBuffer[HistoryTree]
