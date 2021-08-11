@@ -4,8 +4,9 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Random
 import scala.util.control.Breaks.{break, breakable}
 
-object ConvertToCNF {
-  def getGrammarOnCNF(grammar: Grammar, historyTreeBuilder: RuleUpdatingBuilder):Grammar = {
+class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
+
+  def getGrammarOnCNF(grammar: Grammar):Grammar = {
     var convertedGrammar = grammar
     convertedGrammar = eliminateLambda(convertedGrammar)
     convertedGrammar = eliminateChains(convertedGrammar)
@@ -22,8 +23,9 @@ object ConvertToCNF {
       val nullableVariablesIterator:Iterator[Set[RuleElement]] = nullable.filter(p => rule.getRight().contains(p)).subsets()   // Iterator of all subsets of nullable variables in the right-side of the current rule
       for (subset <- nullableVariablesIterator){    // For all subsets of relevant nullables
         val newRight = rule.getRight().filter(s => !subset.contains(s) && !s.isInstanceOf[Lambda]) // New right is the old rights, but without the variables in the current subset and without lambda
-        rulesInNewGrammar += new Rule(rule.getLeft(), newRight)  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
-
+        val newRule = new Rule(rule.getLeft(), newRight)
+        rulesInNewGrammar += newRule  // Adds the rule WITHOUT the variables that are nullable (and also that is not lambda)
+        ruleUpdatingBuilder.ruleUpdated(rule, newRule, 1)
       }
     }
     rulesInNewGrammar = rulesInNewGrammar.filter(rule => rule.getRight().nonEmpty)  // This removes rules that does not have anything on the right-side this happens when the subset in loop above is all of the variables on the right-side
@@ -76,11 +78,14 @@ object ConvertToCNF {
         val rightVar = rule.getRight().head   // If a rule is a chain rule, there is only one element in the right-side
         val rulesFromRightVar = grammar.getRules().filter(r => r.getLeft().equals(rightVar))    // Set of all right-sides of rules with the right-side of the chain on the left
         for (r <- rulesFromRightVar){
-          newRules += new Rule(rule.getLeft(), r.getRight())    // Adding all rules that has the right of the chain-rule on the left
+          val newRule = new Rule(rule.getLeft(), r.getRight())
+          newRules += newRule   // Adding all rules that has the right of the chain-rule on the left
+          ruleUpdatingBuilder.ruleUpdated(rule, newRule, 2)
         }
       }
       else {
         newRules += rule
+        ruleUpdatingBuilder.ruleUpdated(rule, rule, 2)
       }
     }
     // At this point the list of rules could still have chain rules
@@ -93,7 +98,9 @@ object ConvertToCNF {
           val rightVar = rule.getRight().head
           val rulesFromRightVar = newRules.filter(r => r.getLeft().equals(rightVar))    // The right-sides of rules are found in the updated set, not the original
           for (r <- rulesFromRightVar){
-            newRules += new Rule(rule.getLeft(), r.getRight())    // The rules to replace the chain rule is added
+            val newRule = new Rule(rule.getLeft(), r.getRight())
+            newRules += newRule   // The rules to replace the chain rule is added
+            ruleUpdatingBuilder.ruleUpdated(rule, newRule, 2)
           }
         }
       }
@@ -139,6 +146,7 @@ object ConvertToCNF {
             // Add the updated rule to temp rules
             updatedTempRules += updatedRule
             updatedTempRules += usefulTerminalRule
+            ruleUpdatingBuilder.ruleUpdated(rule, updatedRule, 3)
           }
         }
         noTerminalsInRuleUnlessOnlyOne = (updatedTempRules.filter(rule => (rule.getRight().filter(ruleElem => ruleElem.isInstanceOf[Terminal]).size == 0) || rule.getRight().size.equals(1))).size.equals(updatedTempRules.size)
@@ -180,6 +188,7 @@ object ConvertToCNF {
           // Add the updated rule to the temp rules (This could technically now be on cnf, but if it is we move it in the next iteration)
           updatedTempRules += newRule
           updatedTempRules += usefulRule
+          ruleUpdatingBuilder.ruleUpdated(rule, newRule, 3)
         }
       }
     }

@@ -6,18 +6,17 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
   var historyTrees = new ListBuffer[HistoryTree]
   // create a historyTree for each of all the original rules
   for (rule <- originalGrammar.getRules()) {
-    historyTrees.append(HistoryTreeNode(rule, ListBuffer(Leaf), 0))
+    historyTrees.append(HistoryTreeNode(rule, Set(Leaf), 0))
   }
 
   def ruleUpdated(oldRule: Rule, newRule: Rule, step: Int): Unit = {
     var tree = findTreeWithRule(oldRule)
     if(tree.equals(Leaf)){
-      ???     // The tree does not exist
+      ???     //TODO: The tree does not exist
     }
     historyTrees-=tree
     val newTree = createNewRule(tree, oldRule, newRule, step)
     historyTrees+=newTree
-
   }
 
   def findTreeWithRule(rule: Rule): HistoryTree = {
@@ -50,11 +49,11 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
       case HistoryTreeNode(rule, children, stepOld) =>
         var newChildren = children
         if (rule.equals(oldRule)){
-          val newNode = HistoryTreeNode(newRule, ListBuffer(Leaf), step)
-          newChildren = newChildren.append(newNode)
+          val newNode = HistoryTreeNode(newRule, Set(Leaf), step)
+          newChildren += newNode
         } else {
           for (child <- children) {
-            newChildren.append(createNewRule(child, oldRule, newRule, step))
+            newChildren += createNewRule(child, oldRule, newRule, step)
           }
         }
         return HistoryTreeNode(rule, newChildren, stepOld)

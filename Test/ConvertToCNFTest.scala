@@ -4,6 +4,8 @@ import scala.collection.mutable.ListBuffer
 
 class ConvertToCNFTest {
   var grammar1:Grammar = _   // A grammar for the tests to use
+  var converter = new ConvertToCNF(new NoUpdatingBuilder())
+
   @BeforeEach
   def setUp(): Unit ={
     val rule1:Rule = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A"), new NonTerminal("B")))    // Creating rules for the grammar that should be converted
@@ -26,16 +28,13 @@ class ConvertToCNFTest {
 
     val rules2: Set[Rule] = Set(rule6, rule7, rule8, rule9, rule10, rule11, rule12)
     val grammarExpected: Grammar = new Grammar(rules2, new NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.eliminateLambda(grammar1)
-
-    println(grammarConverted.getRules())
-    println(grammarExpected.getRules())
+    val grammarConverted = converter.eliminateLambda(grammar1)
 
     assert(grammarConverted.equals(grammarExpected))
   }
 
   @Test def grammarHasChanged(): Unit = {
-    val grammar2 = ConvertToCNF.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
+    val grammar2 = converter.eliminateLambda(grammar1)    //Converting grammar to not have lambda rules
 
     assert(!grammar1.equals(grammar2))
   }
@@ -43,8 +42,7 @@ class ConvertToCNFTest {
   @Test
   def findAllNullableVaribles(): Unit ={
     val expectedNullables = Set(new NonTerminal("S"), new NonTerminal("A"), new NonTerminal("B"))
-    val actualNullables = ConvertToCNF.findNullables(grammar1)
-    print(actualNullables)
+    val actualNullables = converter.findNullables(grammar1)
     assert(expectedNullables == actualNullables)
   }
 
@@ -57,7 +55,7 @@ class ConvertToCNFTest {
     val rule5 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new Terminal("b")))
     val rules1 = Set(rule1, rule2, rule3, rule4, rule5)
     val grammar = new Grammar(rules1, new NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.eliminateChains(grammar)
+    val grammarConverted = converter.eliminateChains(grammar)
 
     val rule6 = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A"), new NonTerminal("B")))
     val rule7 = new Rule(new NonTerminal("A"), ListBuffer(new Terminal("a"), new NonTerminal("A")))
@@ -81,7 +79,7 @@ class ConvertToCNFTest {
     val rule6 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new Terminal("b")))
     val rules1 = Set(rule1, rule2, rule3, rule4, rule5, rule6)
     val grammar = new Grammar(rules1, new NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.eliminateChains(grammar)
+    val grammarConverted = converter.eliminateChains(grammar)
 
     val rule10 = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A"), new NonTerminal("B")))
     val rule11 = new Rule(new NonTerminal("S"), ListBuffer(new Terminal("a"), new NonTerminal("A")))
@@ -111,7 +109,7 @@ class ConvertToCNFTest {
     val rule18 = new Rule(new NonTerminal("B"), ListBuffer(new NonTerminal("S")))
     val rules1 = Set(rule12, rule13, rule14, rule15, rule16, rule17, rule18)
     val grammar = new Grammar(rules1, new NonTerminal("S"))
-    val grammarConverted = ConvertToCNF.eliminateChains(grammar)
+    val grammarConverted = converter.eliminateChains(grammar)
 
     val rule0 = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A"), new NonTerminal("B")))
     val rule1 = new Rule(new NonTerminal("S"), ListBuffer(new Terminal("a"), new NonTerminal("A")))
@@ -147,7 +145,7 @@ class ConvertToCNFTest {
     val rule11 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new Terminal("b")))
     val rule12 = new Rule(new NonTerminal("C"), ListBuffer(new Terminal("b")))
     val rules2 = Set(rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11, rule12)
-    val grammar = ConvertToCNF.getGrammarOnCNF(new Grammar(rules2, new NonTerminal("S")), new NoUpdatingBuilder())
+    val grammar = converter.getGrammarOnCNF(new Grammar(rules2, new NonTerminal("S")))
 
     for (rule <- grammar.getRules()){
       val rightSide = rule.getRight()
@@ -168,7 +166,7 @@ class ConvertToCNFTest {
 //    val rule5 = new Rule(new NonTerminal("A"), ListBuffer(new Terminal("a"), new NonTerminal("A")))
 //   val rule11 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("b")))
     val rules2 = Set(rule0)
-    val grammar = ConvertToCNF.fixRightSides(new Grammar(rules2, new NonTerminal("S")))
+    val grammar = converter.fixRightSides(new Grammar(rules2, new NonTerminal("S")))
   }
 
 }
