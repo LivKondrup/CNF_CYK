@@ -1,3 +1,5 @@
+import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
+import HistoryTreeArchitecture.NoUpdatingBuilder
 import org.junit.jupiter.api.{BeforeEach, Test}
 
 import scala.collection.mutable

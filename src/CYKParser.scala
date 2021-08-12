@@ -1,3 +1,6 @@
+import GrammarArchitecture.{Grammar, NonTerminal, Terminal}
+import OtherTools.ListBufferTools
+
 import scala.collection.IterableOnce.iterableOnceExtensionMethods
 import scala.collection.mutable.ListBuffer
 
@@ -16,7 +19,6 @@ class CYKParser {
     if(parseArray(0)(0) != null && parseArray(0)(0).contains(grammar.getStartVariable())){
       return true
     }
-
     return false
   }
 
@@ -33,7 +35,6 @@ class CYKParser {
     parseArray
   }
 
-
   private def fillInitialRow(word: String, grammar: Grammar, parseArray: Array[Array[ListBuffer[NonTerminal]]]): Array[Array[ListBuffer[NonTerminal]]] = {
     val wordLen = word.length
     for (i <- 0 until wordLen) {
@@ -44,7 +45,6 @@ class CYKParser {
       val listOfUseFulNonTerminal = ListBuffer.empty ++= setOfUseFulNonTerminals //Creates a listBuffer from a Set
 
       parseArray(wordLen-1)(i) = listOfUseFulNonTerminal
-
     }
     parseArray
   }

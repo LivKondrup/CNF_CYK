@@ -1,3 +1,7 @@
+package HistoryTreeArchitecture
+
+import GrammarArchitecture.{Grammar, Rule}
+
 import scala.collection.mutable.ListBuffer
 
 class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuilder {

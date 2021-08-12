@@ -1,5 +1,7 @@
+package GrammarArchitecture
+
 case class Terminal(name: String) extends RuleElement {
-  def getName(): String ={
+  def getName(): String = {
     return name
   }
 

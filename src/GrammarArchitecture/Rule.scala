@@ -1,3 +1,4 @@
+package GrammarArchitecture
 import scala.collection.mutable.ListBuffer
 
 class Rule(left: NonTerminal, right: ListBuffer[RuleElement]) {

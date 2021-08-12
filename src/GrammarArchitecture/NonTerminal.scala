@@ -1,5 +1,7 @@
+package GrammarArchitecture
+
 case class NonTerminal(name: String) extends RuleElement {
-  override def getName(): String ={
+  override def getName(): String = {
     return name
   }
 

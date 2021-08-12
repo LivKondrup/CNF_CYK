@@ -1,3 +1,4 @@
+import GrammarArchitecture.{Grammar, NonTerminal, Rule, Terminal}
 import org.junit.jupiter.api.Test
 
 import scala.collection.mutable.ListBuffer

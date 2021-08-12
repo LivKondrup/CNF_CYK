@@ -1,3 +1,5 @@
+import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
+import HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeNode, Leaf}
 import org.junit.jupiter.api.{BeforeAll, BeforeEach, Test}
 
 import scala.collection.mutable.ListBuffer

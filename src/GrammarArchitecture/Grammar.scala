@@ -1,4 +1,4 @@
-import scala.collection.mutable.ListBuffer
+package GrammarArchitecture
 
 class Grammar(rules: Set[Rule], start:NonTerminal) {
   def hasNonTerminal(nonTerminal: NonTerminal): Boolean = {

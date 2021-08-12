@@ -1,4 +1,6 @@
-import scala.collection.mutable.ListBuffer
+package HistoryTreeArchitecture
+
+import GrammarArchitecture.Rule
 
 sealed abstract class HistoryTree
 

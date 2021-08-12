@@ -1,3 +1,6 @@
+import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, RuleElement, Terminal}
+import HistoryTreeArchitecture.RuleUpdatingBuilder
+
 import scala.::
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
