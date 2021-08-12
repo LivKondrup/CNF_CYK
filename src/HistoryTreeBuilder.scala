@@ -44,7 +44,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
     }
   }
 
-  def createNewRule(tree: HistoryTree, oldRule: Rule, newRule: Rule, step: Int): HistoryTree = {
+  private def createNewRule(tree: HistoryTree, oldRule: Rule, newRule: Rule, step: Int): HistoryTree = {
     tree match {
       case HistoryTreeNode(rule, children, stepOld) =>
         var newChildren = children

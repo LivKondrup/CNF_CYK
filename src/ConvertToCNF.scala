@@ -37,7 +37,7 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
     findNullableVariables(grammar, findLambdaVariables(grammar))
   }
 
-  def findLambdaVariables(grammar: Grammar):Set[RuleElement] = {
+  private def findLambdaVariables(grammar: Grammar):Set[RuleElement] = {
     var nullable: Set[RuleElement] = Set()   // To maintain the list of nullables
     // Finds all variables that can lead to lambda
     for (rule <- grammar.getRules()){    // Going through all rules in the grammar
@@ -49,7 +49,7 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
     nullable
   }
 
-  def findNullableVariables(grammar: Grammar, lambdaVariables:Set[RuleElement]):Set[RuleElement] = {
+  private def findNullableVariables(grammar: Grammar, lambdaVariables:Set[RuleElement]):Set[RuleElement] = {
     var nullable:Set[RuleElement] = lambdaVariables
     // Finds all other nullable variables
     var nullableChanged = true    // Is true if the list of nullables have changed after the last time of going through the entire grammar
@@ -116,7 +116,7 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
     new Grammar(newRules, grammar.getStartVariable())
   }
 
-  def renameTerminals(tempRules: Set[Rule], newRules: Set[Rule], grammar: Grammar): (Set[Rule], Set[Rule]) ={
+  private def renameTerminals(tempRules: Set[Rule], newRules: Set[Rule], grammar: Grammar): (Set[Rule], Set[Rule]) ={
     var updatedTempRules = tempRules
     var updatedNewRules = newRules
     // rule can only have terminals if it is the only one
@@ -155,7 +155,7 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
     return (updatedTempRules, updatedNewRules)
   }
 
-  def simplifyRules(tempRules: Set[Rule], newRules: Set[Rule], grammar: Grammar): (Set[Rule], Set[Rule]) = {
+  private def simplifyRules(tempRules: Set[Rule], newRules: Set[Rule], grammar: Grammar): (Set[Rule], Set[Rule]) = {
     var updatedTempRules = tempRules
     var updatedNewRules = newRules
 
@@ -195,7 +195,7 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
     (updatedTempRules, updatedNewRules)
   }
 
-  def getFreshNonTerminal(grammar: Grammar): NonTerminal = {
+  private def getFreshNonTerminal(grammar: Grammar): NonTerminal = {
     val alphabet = ListBuffer("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
     for (letter <- alphabet){
       for(letter2 <- alphabet){
