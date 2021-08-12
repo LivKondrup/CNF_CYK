@@ -15,7 +15,7 @@ class CYKParserTest {
 
     val parser = new CYKParser()
 
-    val canParseaab = parser.parse("aab", grammar)
+    val canParseaab = parser.canParse("aab", grammar)
 
     assert(!canParseaab)
   }
@@ -30,7 +30,7 @@ class CYKParserTest {
 
     val parser = new CYKParser()
 
-    val canParseab = parser.parse("ab", grammar)
+    val canParseab = parser.canParse("ab", grammar)
 
     assert(canParseab)
   }
@@ -48,13 +48,13 @@ class CYKParserTest {
 
     val parser = new CYKParser()
 
-    val canParseab = parser.parse("ab", grammar)
+    val canParseab = parser.canParse("ab", grammar)
     assert(canParseab)
 
-    val canParseaab = parser.parse("aab", grammar)
+    val canParseaab = parser.canParse("aab", grammar)
     assert(canParseaab)
 
-    val canParseaba = parser.parse("aba", grammar)
+    val canParseaba = parser.canParse("aba", grammar)
     assert(!canParseaba)
   }
 

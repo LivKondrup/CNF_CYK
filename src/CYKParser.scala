@@ -6,7 +6,7 @@ import scala.collection.mutable.ListBuffer
 
 class CYKParser {
 
-  def parse(word:String, grammar: Grammar): Boolean ={
+  def parseAndGetArray(word:String, grammar: Grammar): Array[Array[ListBuffer[NonTerminal]]] = {
     val wordLen = word.length
     var parseArray = Array.ofDim[ListBuffer[NonTerminal]](wordLen, wordLen)
 
@@ -16,6 +16,11 @@ class CYKParser {
     // Dynamically fill rest
     parseArray = fillRest(grammar, parseArray, wordLen)
 
+    parseArray
+  }
+
+  def canParse(word:String, grammar: Grammar): Boolean ={
+    val parseArray = parseAndGetArray(word, grammar)
     if(parseArray(0)(0) != null && parseArray(0)(0).contains(grammar.getStartVariable())){
       return true
     }
