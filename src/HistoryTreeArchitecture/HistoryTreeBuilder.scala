@@ -69,4 +69,33 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
     return historyTrees
   }
 
+  // get the rule that was made before this in the Historytree
+  def getPreviousRule(rule: Rule): Rule = {
+    val tree = findTreeWithRule(rule)
+    findPreviousRule(rule, tree)
+  }
+
+  private def findPreviousRule(ruleToFind: Rule, tree: HistoryTree): Rule = {
+    tree match {
+      case HistoryTreeNode(currentRule, children, _) =>
+        val childIsRuleToSearchFor = children.exists(historyTree => historyTree match {
+          case HistoryTreeNode(rule, _, _) => rule.equals(ruleToFind)
+          case Leaf => false
+        })
+        if (childIsRuleToSearchFor){
+          return currentRule
+        } else {
+          for(child<- children){
+            val findRuleInChildTree = findPreviousRule(ruleToFind, child)
+            if (findRuleInChildTree != null){
+              return findRuleInChildTree
+            }
+          }
+        }
+        return null
+      case Leaf => null
+    }
+  }
+
+
 }

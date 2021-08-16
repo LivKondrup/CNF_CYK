@@ -1,10 +1,40 @@
-import GrammarArchitecture.{Grammar, NonTerminal, Terminal}
+import GrammarArchitecture.{Grammar, NonTerminal, RuleElement, Terminal}
 import OtherTools.ListBufferTools
+import OtherTools.ListBufferTools.combineUsefulPairs
+import org.graalvm.compiler.word.Word
 
 import scala.collection.IterableOnce.iterableOnceExtensionMethods
 import scala.collection.mutable.ListBuffer
 
 class CYKParser {
+
+  // This assumes that the given word CAN be parsed
+  def parseAndGetDerivationTree(word: String, grammar: Grammar): DerivationTree = {
+    val parseArray = parseAndGetArray(word, grammar)
+    getDerivationTreeFromParseArray(parseArray, grammar, 0, 0, word)
+  }
+
+  private def getDerivationTreeFromParseArray(parseArray: Array[Array[ListBuffer[NonTerminal]]], grammar: Grammar, i: Int, j: Int, word: String): DerivationTree = {
+    println(parseArray(i)(j))
+    if(i<word.length-1){
+      val currentNonTerminal = parseArray(i)(j).head
+
+      val pairsThatMightDeriveThis = combineUsefulPairs(parseArray, i, j).asInstanceOf[ListBuffer[ListBuffer[RuleElement]]]
+      val usefulRulesRightSide = grammar.getRules().filter(rule => rule.getLeft().equals(currentNonTerminal)).map(rule => rule.getRight())
+      val usefulPairs = pairsThatMightDeriveThis.filter(pair => usefulRulesRightSide.contains(pair))
+
+      val indexOfUseFulPair = pairsThatMightDeriveThis.indexOf(usefulPairs.head)
+
+      val posLefti = i+pairsThatMightDeriveThis.length-indexOfUseFulPair
+
+      val leftTree = getDerivationTreeFromParseArray(parseArray, grammar, posLefti, j, word)
+      val rightTree= getDerivationTreeFromParseArray(parseArray, grammar, i+indexOfUseFulPair+1, j+indexOfUseFulPair+1, word)
+
+      DerivationTreeNode(currentNonTerminal, ListBuffer(leftTree, rightTree))
+    } else {  // i==max
+      DerivationTreeNode(parseArray(i)(j).head, ListBuffer(Leaf(Terminal(word.charAt(j).toString))))
+    }
+  }
 
   def parseAndGetArray(word:String, grammar: Grammar): Array[Array[ListBuffer[NonTerminal]]] = {
     val wordLen = word.length

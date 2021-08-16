@@ -1,5 +1,5 @@
 package GrammarArchitecture
 
-abstract class RuleElement {
+trait RuleElement {
   def getName(): String
 }
