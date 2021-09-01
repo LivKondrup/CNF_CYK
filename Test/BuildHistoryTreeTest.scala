@@ -121,7 +121,7 @@ class BuildHistoryTreeTest {
 
     // S rule tree has S->B and S->b
     val treeS = builder.findTreeWithRule(rule1)
-    println(treeS)
+    //println(treeS)
     val expectedSBRule = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B")))
     val expectedSbRule = new Rule(NonTerminal("S"), ListBuffer(Terminal("b")))
     assert(builder.treeContainsRule(treeS, expectedSBRule))
