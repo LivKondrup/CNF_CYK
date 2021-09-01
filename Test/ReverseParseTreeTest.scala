@@ -5,7 +5,7 @@ import org.junit.jupiter.api.{BeforeEach, Test}
 
 import scala.collection.mutable.ListBuffer
 
-class ReverseDerivationTreeTest {
+class ReverseParseTreeTest {
   var grammar: Grammar = null
   @BeforeEach
   def setUp(): Unit = {
@@ -20,19 +20,19 @@ class ReverseDerivationTreeTest {
   def correctReversalOfRenaming(): Unit = {
     val historyTreeBuilder = new HistoryTreeBuilder(grammar)
     val convertedGrammar = new ConvertToCNF(historyTreeBuilder).getGrammarOnCNF(grammar)
-    val treeAfterCYK = CYKParser.parseAndGetDerivationTree("abc", convertedGrammar)
-    val reverseDerivationTreeActual = DerivationTreeConverter.reverseRenaming(treeAfterCYK, historyTreeBuilder)
-    val reverseDerivationTreeExpected = DerivationTreeNode(NonTerminal("S"), ListBuffer(
-      DerivationTreeNode(NonTerminal("A"), ListBuffer(Leaf(Terminal("a")))),
-      DerivationTreeNode(NonTerminal("B"), ListBuffer(Leaf(Terminal("b")))),
-      DerivationTreeNode(NonTerminal("C"), ListBuffer(Leaf(Terminal("c"))))
+    val treeAfterCYK = CYKParser.parseAndGetParseTree("abc", convertedGrammar)
+    val reverseParseTreeActual = ParseTreeConverter.reverseRenaming(treeAfterCYK, historyTreeBuilder)
+    val reverseParseTreeExpected = ParseTreeNode(NonTerminal("S"), ListBuffer(
+      ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Terminal("a")))),
+      ParseTreeNode(NonTerminal("B"), ListBuffer(ParseTreeLeaf(Terminal("b")))),
+      ParseTreeNode(NonTerminal("C"), ListBuffer(ParseTreeLeaf(Terminal("c"))))
     ))
 
-    println("Expected" + reverseDerivationTreeExpected)
-    println("Actual: " + reverseDerivationTreeActual)
+    println("Expected" + reverseParseTreeExpected)
+    println("Actual: " + reverseParseTreeActual)
     println("After CYK: " + treeAfterCYK)
 
 
-    assert(reverseDerivationTreeActual == reverseDerivationTreeExpected)
+    assert(reverseParseTreeActual == reverseParseTreeExpected)
   }
 }

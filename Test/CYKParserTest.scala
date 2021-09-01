@@ -71,12 +71,12 @@ class CYKParserTest {
     val grammar = new Grammar(rules1, NonTerminal("S"))
     val parser = CYKParser
 
-    val tree = parser.parseAndGetDerivationTree("ab", grammar)
-    val expectedTree = DerivationTreeNode(grammar.getStartVariable(),
-      ListBuffer(DerivationTreeNode(NonTerminal("A"),
-        ListBuffer(Leaf(Terminal("a")))),
-      DerivationTreeNode(NonTerminal("B"),
-        ListBuffer(Leaf(Terminal("b"))))))
+    val tree = parser.parseAndGetParseTree("ab", grammar)
+    val expectedTree = ParseTreeNode(grammar.getStartVariable(),
+      ListBuffer(ParseTreeNode(NonTerminal("A"),
+        ListBuffer(ParseTreeLeaf(Terminal("a")))),
+      ParseTreeNode(NonTerminal("B"),
+        ListBuffer(ParseTreeLeaf(Terminal("b"))))))
 
     assert(tree.equals(expectedTree))
   }
@@ -93,23 +93,23 @@ class CYKParserTest {
     val grammar = new Grammar(rules1, NonTerminal("S"))
     val parser = CYKParser
 
-    val tree = parser.parseAndGetDerivationTree("aabb", grammar)
+    val tree = parser.parseAndGetParseTree("aabb", grammar)
     val expectedTree =
-      DerivationTreeNode(NonTerminal("S"), ListBuffer(
-        DerivationTreeNode(NonTerminal("A"), ListBuffer(
-          DerivationTreeNode(NonTerminal("A"), ListBuffer(
-            Leaf(Terminal("a"))
+      ParseTreeNode(NonTerminal("S"), ListBuffer(
+        ParseTreeNode(NonTerminal("A"), ListBuffer(
+          ParseTreeNode(NonTerminal("A"), ListBuffer(
+            ParseTreeLeaf(Terminal("a"))
           )),
-          DerivationTreeNode(NonTerminal("A"), ListBuffer(
-            Leaf(Terminal("a"))
+          ParseTreeNode(NonTerminal("A"), ListBuffer(
+            ParseTreeLeaf(Terminal("a"))
           ))
         )),
-        DerivationTreeNode(NonTerminal("B"), ListBuffer(
-          DerivationTreeNode(NonTerminal("B"), ListBuffer(
-            Leaf(Terminal("b"))
+        ParseTreeNode(NonTerminal("B"), ListBuffer(
+          ParseTreeNode(NonTerminal("B"), ListBuffer(
+            ParseTreeLeaf(Terminal("b"))
           )),
-          DerivationTreeNode(NonTerminal("B"), ListBuffer(
-            Leaf(Terminal("b"))
+          ParseTreeNode(NonTerminal("B"), ListBuffer(
+            ParseTreeLeaf(Terminal("b"))
           ))
         ))
       ))
@@ -129,14 +129,14 @@ class CYKParserTest {
 
     assert(CYKParser.canParse("abc", grammarCNF))
 
-    val tree = CYKParser.parseAndGetDerivationTree("abc", grammarCNF)
+    val tree = CYKParser.parseAndGetParseTree("abc", grammarCNF)
     println(tree)
-    val expectedTree = DerivationTreeNode(NonTerminal("S"), ListBuffer(
-      DerivationTreeNode(NonTerminal("AA"), ListBuffer(
-        DerivationTreeNode(NonTerminal("A"), ListBuffer(Leaf(Terminal("a")))),
-        DerivationTreeNode(NonTerminal("B"), ListBuffer(Leaf(Terminal("b"))))
+    val expectedTree = ParseTreeNode(NonTerminal("S"), ListBuffer(
+      ParseTreeNode(NonTerminal("AA"), ListBuffer(
+        ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Terminal("a")))),
+        ParseTreeNode(NonTerminal("B"), ListBuffer(ParseTreeLeaf(Terminal("b"))))
       )),
-      DerivationTreeNode(NonTerminal("C"), ListBuffer(Leaf(Terminal("c"))))
+      ParseTreeNode(NonTerminal("C"), ListBuffer(ParseTreeLeaf(Terminal("c"))))
     ))
     println(expectedTree)
 

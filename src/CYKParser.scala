@@ -9,12 +9,12 @@ import scala.collection.mutable.ListBuffer
 object CYKParser {
 
   // This assumes that the given word CAN be parsed
-  def parseAndGetDerivationTree(word: String, grammar: Grammar): DerivationTree = {
+  def parseAndGetParseTree(word: String, grammar: Grammar): ParseTree = {
     val parseArray = parseAndGetArray(word, grammar)
-    getDerivationTreeFromParseArray(parseArray, grammar, 0, 0, word)
+    getParseTreeFromParseArray(parseArray, grammar, 0, 0, word)
   }
 
-  private def getDerivationTreeFromParseArray(parseArray: Array[Array[ListBuffer[NonTerminal]]], grammar: Grammar, i: Int, j: Int, word: String): DerivationTree = {
+  private def getParseTreeFromParseArray(parseArray: Array[Array[ListBuffer[NonTerminal]]], grammar: Grammar, i: Int, j: Int, word: String): ParseTree = {
     if(i<word.length-1){
       // TODO: Problem: pairs that might derive this does not give the correct index as it excludes the ones in the list that does not make sense (eg an empty spot in the table)
       val currentNonTerminal = parseArray(i)(j).head
@@ -27,12 +27,12 @@ object CYKParser {
 
       val posLefti = i+pairsThatMightDeriveThis.length-indexOfUseFulPair
 
-      val leftTree = getDerivationTreeFromParseArray(parseArray, grammar, posLefti, j, word)
-      val rightTree= getDerivationTreeFromParseArray(parseArray, grammar, i+indexOfUseFulPair+1, j+indexOfUseFulPair+1, word)
+      val leftTree = getParseTreeFromParseArray(parseArray, grammar, posLefti, j, word)
+      val rightTree= getParseTreeFromParseArray(parseArray, grammar, i+indexOfUseFulPair+1, j+indexOfUseFulPair+1, word)
 
-      DerivationTreeNode(currentNonTerminal, ListBuffer(leftTree, rightTree))
+      ParseTreeNode(currentNonTerminal, ListBuffer(leftTree, rightTree))
     } else {  // i==max
-      DerivationTreeNode(parseArray(i)(j).head, ListBuffer(Leaf(Terminal(word.charAt(j).toString))))
+      ParseTreeNode(parseArray(i)(j).head, ListBuffer(ParseTreeLeaf(Terminal(word.charAt(j).toString))))
     }
   }
 
