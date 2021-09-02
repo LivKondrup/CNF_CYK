@@ -69,7 +69,6 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
     return historyTrees
   }
 
-  // get the rule that was made in the step previous to this step
   def getPreviousRule(rule: Rule): Rule = {
     val tree = findTreeWithRule(rule)
     findPreviousRule(rule, tree)

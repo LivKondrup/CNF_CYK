@@ -1,4 +1,4 @@
-import GrammarArchitecture.{Rule, RuleElement}
+import GrammarArchitecture.{NonTerminal, Rule, RuleElement}
 import HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder}
 
 import scala.collection.mutable.ListBuffer
@@ -19,7 +19,33 @@ object ParseTreeConverter {
   }
 
   def reverseChains(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {
-    ???
+    val treeWithChainRules = reverseRenamingOfSubTrees(parseTree, historyTreeBuilder)
+    treeWithChainRules.head
+  }
+
+  private def reverseChainsOfSubTrees(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ListBuffer[ParseTree] = {
+    parseTree match {
+      case ParseTreeNode(name, children) =>
+        // Build the rule at the root of the current tree
+        val prevRule: Rule = getPreviousRule(historyTreeBuilder, name, children)
+
+        // build child trees
+        val childTrees:ListBuffer[ParseTree] = ListBuffer()
+        for(child<-children){
+          val newChild = reverseChainsOfSubTrees(child, historyTreeBuilder)
+          childTrees ++= newChild
+        }
+
+        if(prevRule.isChainRule()){
+          // Since the rule is a chain rule the right side will only have one element, which is a NonTerminal
+          val newSecondLayer = NonTerminal(prevRule.getRight().head.getName())
+          val newRoot = prevRule.getLeft()
+          ListBuffer(ParseTreeNode(newRoot, ListBuffer(ParseTreeNode(newSecondLayer, childTrees))))
+        } else {
+          ListBuffer(parseTree)
+        }
+      case ParseTreeLeaf(term) => ListBuffer(ParseTreeLeaf(term))
+    }
   }
 
   // TODO: does not check if reversal is in correct step
@@ -32,17 +58,7 @@ object ParseTreeConverter {
     parseTree match {
       case ParseTreeNode(name, children) =>
         // Build the rule at the root of the current tree
-        var rightSide:ListBuffer[RuleElement] = ListBuffer()
-        for(child<-children){
-          child match{
-            case ParseTreeNode(name, _) => rightSide+=name
-            case ParseTreeLeaf(term) => rightSide += term
-          }
-        }
-        val rule = new Rule(name, rightSide)
-
-        // Find the rule previous to this rule in the history trees
-        val prevRule = historyTreeBuilder.getPreviousRule(rule)
+        val prevRule: Rule = getPreviousRule(historyTreeBuilder, name, children)
 
         // Recursively reverse the child trees
         val childTrees:ListBuffer[ParseTree] = ListBuffer()
@@ -63,6 +79,18 @@ object ParseTreeConverter {
   }
 
 
+  private def getPreviousRule(historyTreeBuilder: HistoryTreeBuilder, name: NonTerminal, children: ListBuffer[ParseTree]) = {
+    var rightSide: ListBuffer[RuleElement] = ListBuffer()
+    for (child <- children) {
+      child match {
+        case ParseTreeNode(name, _) => rightSide += name
+        case ParseTreeLeaf(term) => rightSide += term
+      }
+    }
+    val rule = new Rule(name, rightSide)
 
-
+    // Find the rule previous to this rule in the history trees
+    val prevRule = historyTreeBuilder.getPreviousRule(rule)
+    prevRule
+  }
 }

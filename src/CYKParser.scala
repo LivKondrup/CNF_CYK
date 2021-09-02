@@ -16,7 +16,6 @@ object CYKParser {
 
   private def getParseTreeFromParseArray(parseArray: Array[Array[ListBuffer[NonTerminal]]], grammar: Grammar, i: Int, j: Int, word: String): ParseTree = {
     if(i<word.length-1){
-      // TODO: Problem: pairs that might derive this does not give the correct index as it excludes the ones in the list that does not make sense (eg an empty spot in the table)
       val currentNonTerminal = parseArray(i)(j).head
 
       val pairsThatMightDeriveThis = combineUsefulPairs(parseArray, i, j).asInstanceOf[ListBuffer[ListBuffer[RuleElement]]]
