@@ -1,5 +1,5 @@
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
-import HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeNode, Leaf}
+import HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeNode, HistoryTreeLeaf}
 import org.junit.jupiter.api.{BeforeAll, BeforeEach, Test}
 
 import scala.collection.mutable.ListBuffer
@@ -19,13 +19,13 @@ class BuildHistoryTreeTest {
   @Test
   def isSetUpCorrect(): Unit = {
     val trees = builder.getHistoryTrees()
-    val expectedTree1 = new HistoryTreeNode(new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("B"))), Set(Leaf), 0)
+    val expectedTree1 = new HistoryTreeNode(new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("B"))), Set(HistoryTreeLeaf), 0)
     assert(trees.contains(expectedTree1))
 
-    val expectedTree2 = new HistoryTreeNode(new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A"))), Set(Leaf), 0)
+    val expectedTree2 = new HistoryTreeNode(new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A"))), Set(HistoryTreeLeaf), 0)
     assert(trees.contains(expectedTree2))
 
-    val expectedTree3 = new HistoryTreeNode(new Rule(NonTerminal("B"), ListBuffer(NonTerminal("B"), Terminal("b"))), Set(Leaf), 0)
+    val expectedTree3 = new HistoryTreeNode(new Rule(NonTerminal("B"), ListBuffer(NonTerminal("B"), Terminal("b"))), Set(HistoryTreeLeaf), 0)
     assert(trees.contains(expectedTree3))
   }
 
@@ -35,7 +35,7 @@ class BuildHistoryTreeTest {
     val newRule = new Rule(NonTerminal("A"), ListBuffer(NonTerminal("C"), NonTerminal("A")))
     builder.ruleUpdated(oldRule, newRule, 1)
     val trees = builder.getHistoryTrees()
-    val expectedNewChildren:Set[HistoryTree] = Set(Leaf, HistoryTreeNode(newRule, Set(Leaf), 1))
+    val expectedNewChildren:Set[HistoryTree] = Set(HistoryTreeLeaf, HistoryTreeNode(newRule, Set(HistoryTreeLeaf), 1))
     val expectedNewTree = new HistoryTreeNode(new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A"))), expectedNewChildren, 0)
     assert (trees.contains(expectedNewTree))
   }
@@ -53,9 +53,9 @@ class BuildHistoryTreeTest {
     converter.eliminateLambda(grammar)
 
     val trees = builder.getHistoryTrees()
-    val newRuleNode = HistoryTreeNode(new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B"))), Set(Leaf), 1)
-    val originalRuleNode = HistoryTreeNode(rule1, Set(Leaf), 1)
-    val expectedTreeFromSRule = HistoryTreeNode(rule1, Set(Leaf, originalRuleNode, newRuleNode), 0)
+    val newRuleNode = HistoryTreeNode(new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B"))), Set(HistoryTreeLeaf), 1)
+    val originalRuleNode = HistoryTreeNode(rule1, Set(HistoryTreeLeaf), 1)
+    val expectedTreeFromSRule = HistoryTreeNode(rule1, Set(HistoryTreeLeaf, originalRuleNode, newRuleNode), 0)
 
     assert(trees.contains(expectedTreeFromSRule))
   }

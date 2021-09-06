@@ -1,6 +1,7 @@
 import GrammarArchitecture.{Grammar, NonTerminal, RuleElement, Terminal}
 import OtherTools.ListBufferTools
 import OtherTools.ListBufferTools.combineUsefulPairs
+import ParseTreeArchitecture.{ParseTree, ParseTreeLeaf, ParseTreeNode}
 import org.graalvm.compiler.word.Word
 
 import scala.collection.IterableOnce.iterableOnceExtensionMethods

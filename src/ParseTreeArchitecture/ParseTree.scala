@@ -1,4 +1,6 @@
-import GrammarArchitecture.{NonTerminal, RuleElement, Terminal}
+package ParseTreeArchitecture
+
+import GrammarArchitecture.{NonTerminal, Terminal}
 
 import scala.collection.mutable.ListBuffer
 

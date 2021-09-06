@@ -1,5 +1,6 @@
 import GrammarArchitecture.{Grammar, NonTerminal, Rule, Terminal}
 import HistoryTreeArchitecture.NoUpdatingBuilder
+import ParseTreeArchitecture.{ParseTreeLeaf, ParseTreeNode}
 import org.junit.jupiter.api.Test
 
 import scala.collection.mutable.ListBuffer

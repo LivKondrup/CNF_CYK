@@ -10,12 +10,12 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
   var historyTrees = new ListBuffer[HistoryTree]
   // create a historyTree for each of all the original rules
   for (rule <- originalGrammar.getRules()) {
-    historyTrees.append(HistoryTreeNode(rule, Set(Leaf), 0))
+    historyTrees.append(HistoryTreeNode(rule, Set(HistoryTreeLeaf), 0))
   }
 
   def ruleUpdated(oldRule: Rule, newRule: Rule, step: Int): Unit = {
     var tree = findTreeWithRule(oldRule)
-    if(tree.equals(Leaf)){
+    if(tree.equals(HistoryTreeLeaf)){
       ???     //TODO: The tree does not exist
     }
     historyTrees-=tree
@@ -24,7 +24,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
   }
 
   def findTreeWithRule(rule: Rule): HistoryTree = {
-    var correctTree:HistoryTree = Leaf
+    var correctTree:HistoryTree = HistoryTreeLeaf
     for (tree <- historyTrees) {
       if (treeContainsRule(tree, rule)) {
         correctTree = tree
@@ -44,7 +44,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
           }
         }
         return false
-      case Leaf => return false
+      case HistoryTreeLeaf => return false
     }
   }
 
@@ -53,7 +53,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
       case HistoryTreeNode(rule, children, stepOld) =>
         var newChildren = children
         if (rule.equals(oldRule)){
-          val newNode = HistoryTreeNode(newRule, Set(Leaf), step)
+          val newNode = HistoryTreeNode(newRule, Set(HistoryTreeLeaf), step)
           newChildren += newNode
         } else {
           for (child <- children) {
@@ -61,7 +61,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
           }
         }
         return HistoryTreeNode(rule, newChildren, stepOld)
-      case Leaf => return tree
+      case HistoryTreeLeaf => return tree
     }
   }
 
@@ -79,7 +79,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
       case HistoryTreeNode(currentRule, children, _) =>
         val childIsRuleToSearchFor = children.exists(historyTree => historyTree match {
           case HistoryTreeNode(rule, _, _) => rule.equals(ruleToFind)
-          case Leaf => false
+          case HistoryTreeLeaf => false
         })
         if (childIsRuleToSearchFor){
           return currentRule
@@ -92,7 +92,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
           }
         }
         return null
-      case Leaf => null
+      case HistoryTreeLeaf => null
     }
   }
 
