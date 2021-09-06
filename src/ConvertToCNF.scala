@@ -88,7 +88,6 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
       }
       else {
         newRules += rule
-        ruleUpdatingBuilder.ruleUpdated(rule, rule, 2)
       }
     }
     // At this point the list of rules could still have chain rules

@@ -19,7 +19,7 @@ object ParseTreeConverter {
   }
 
   def reverseChains(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {
-    val treeWithChainRules = reverseRenamingOfSubTrees(parseTree, historyTreeBuilder)
+    val treeWithChainRules = reverseChainsOfSubTrees(parseTree, historyTreeBuilder)
     treeWithChainRules.head
   }
 

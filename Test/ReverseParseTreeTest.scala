@@ -34,8 +34,9 @@ class ReverseParseTreeTest {
   @Test
   def reverseRenamingOnlyReversesRenaming(): Unit = {
     val rule1 = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B")))
-    val rule2 = new Rule(NonTerminal("A"), ListBuffer(Terminal("a")))
-    val rule3 = new Rule(NonTerminal("B"), ListBuffer(NonTerminal("A")))
+    val rule2 = new Rule(NonTerminal("B"), ListBuffer(NonTerminal("A")))
+    val rule3 = new Rule(NonTerminal("A"), ListBuffer(Terminal("a")))
+
     grammar = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
 
     val historyTreeBuilder = new HistoryTreeBuilder(grammar)
@@ -44,12 +45,14 @@ class ReverseParseTreeTest {
     val reversedParseTreeActual = ParseTreeConverter.reverseRenaming(treeAfterCYK, historyTreeBuilder)
     val reversedTreeExpected = ParseTreeNode(NonTerminal("S"), ListBuffer(ParseTreeLeaf(Terminal("a"))))
 
+    println("grammar cnf: " + convertedGrammar.getRules())
+    println("parse array: " + CYKParser.parseAndGetArray("a", convertedGrammar)(0)(0))
     println("after CYK: " + treeAfterCYK)
     println("actual: " + reversedParseTreeActual)
-    println(historyTreeBuilder.historyTrees(2))
+    println("expected: " + reversedTreeExpected)
 
+    assert(CYKParser.canParse("a", convertedGrammar))
     assert(reversedParseTreeActual == reversedTreeExpected)
-
   }
 
   @Test
@@ -88,13 +91,6 @@ class ReverseParseTreeTest {
     val treeAfterCYK = CYKParser.parseAndGetParseTree("a", convertedGrammar)
     val reversedParseTreeActual = ParseTreeConverter.reverseChains(treeAfterCYK, historyTreeBuilder)
     val reversedTreeExpected = ParseTreeNode(NonTerminal("S"), ListBuffer(ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Terminal("a"))))))
-
-    // TODO: there's a problem with the hostory tree builder, sp that this instance never has a chain rule as prev.
-    // It seems that there's generated an extra layer in the history trees for chain rules.
-
-    println("After CYK: " + treeAfterCYK)
-    println("Actual: " + reversedParseTreeActual)
-    println("Expected: " + reversedTreeExpected)
 
     assert(reversedParseTreeActual == reversedTreeExpected)
   }

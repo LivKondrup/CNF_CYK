@@ -11,12 +11,18 @@ object CYKParser {
   // This assumes that the given word CAN be parsed
   def parseAndGetParseTree(word: String, grammar: Grammar): ParseTree = {
     val parseArray = parseAndGetArray(word, grammar)
-    getParseTreeFromParseArray(parseArray, grammar, 0, 0, word)
+    val parseTree = getParseTreeFromParseArray(parseArray, grammar, 0, 0, word)
+    val a = 0
+    parseTree
   }
 
   private def getParseTreeFromParseArray(parseArray: Array[Array[ListBuffer[NonTerminal]]], grammar: Grammar, i: Int, j: Int, word: String): ParseTree = {
+    var currentNonTerminal = parseArray(i)(j).head
     if(i<word.length-1){
-      val currentNonTerminal = parseArray(i)(j).head
+
+      if(i == 0 && j == 0){
+        currentNonTerminal = grammar.getStartVariable()
+      }
 
       val pairsThatMightDeriveThis = combineUsefulPairs(parseArray, i, j).asInstanceOf[ListBuffer[ListBuffer[RuleElement]]]
       val usefulRulesRightSide = grammar.getRules().filter(rule => rule.getLeft().equals(currentNonTerminal)).map(rule => rule.getRight())
@@ -31,7 +37,10 @@ object CYKParser {
 
       ParseTreeNode(currentNonTerminal, ListBuffer(leftTree, rightTree))
     } else {  // i==max
-      ParseTreeNode(parseArray(i)(j).head, ListBuffer(ParseTreeLeaf(Terminal(word.charAt(j).toString))))
+      if(i == 0 && j == 0) {
+        currentNonTerminal = grammar.getStartVariable()
+      }
+      ParseTreeNode(currentNonTerminal, ListBuffer(ParseTreeLeaf(Terminal(word.charAt(j).toString))))
     }
   }
 
