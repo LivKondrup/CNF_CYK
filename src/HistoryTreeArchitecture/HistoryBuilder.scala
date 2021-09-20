@@ -1,7 +1,8 @@
 package HistoryTreeArchitecture
 
-import GrammarArchitecture.Rule
+import GrammarArchitecture.{Grammar, Rule}
 
-trait RuleUpdatingBuilder {
+trait HistoryBuilder {
+  def init(grammar: Grammar): Unit
   def ruleUpdated(oldRule: Rule, newRule: Rule, step: Int): Unit
 }

@@ -1,15 +1,20 @@
+package CNFConverterArchitecture
+
+import CNFConverterArchitecture.AbstractFactory.CNFConverterFactory
+import CNFConverterArchitecture.Chain.ChainParses
+import CNFConverterArchitecture.Lambda.{LambdaParseBuilder, LambdaParses}
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, RuleElement, Terminal}
-import HistoryTreeArchitecture.RuleUpdatingBuilder
+import HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryBuilder}
 
-import scala.::
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-import scala.util.Random
-import scala.util.control.Breaks.{break, breakable}
+import scala.collection.mutable.{HashMap, ListBuffer}
 
-class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
+class ConvertToCNF(CNFFactory: CNFConverterFactory) {
+  private val buildLambdaParses = CNFFactory.createLambdaParseBuilder()
+  private val buildChainParses = CNFFactory.createChainParseBuilder()
+  private val ruleUpdatingBuilder = CNFFactory.createHistoryTreeBuilder()
 
   def getGrammarOnCNF(grammar: Grammar):Grammar = {
+    ruleUpdatingBuilder.init(grammar)
     var convertedGrammar = grammar
     convertedGrammar = eliminateLambda(convertedGrammar)
     convertedGrammar = eliminateChains(convertedGrammar)
@@ -54,6 +59,8 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
 
   private def findNullableVariables(grammar: Grammar, lambdaVariables:Set[RuleElement]):Set[RuleElement] = {
     var nullable:Set[RuleElement] = lambdaVariables
+    val listOfLambdaNonTerminals = lambdaVariables.map(variable => NonTerminal(variable.getName())).toList
+    buildLambdaParses.initializeParseTrees(listOfLambdaNonTerminals.to(ListBuffer))
     // Finds all other nullable variables
     var nullableChanged = true    // Is true if the list of nullables have changed after the last time of going through the entire grammar
     while (nullableChanged){
@@ -67,6 +74,7 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
         }
         if (rightSidesNullable){    // If all the right-sides were nullable, then the left is nullable and should be added to nullables
           nullable += rule.getLeft()
+          buildLambdaParses.updateLambdaParses(rule)
         }
       }
       nullableChanged = !nullable.equals(nullableBefore)   // If the list of nullables have changed, the while-loop should keep going
@@ -74,7 +82,52 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
     nullable
   }
 
+  private def findDerivatives(grammar: Grammar): HashMap[NonTerminal, Set[NonTerminal]] = {
+    val derivatives = HashMap[NonTerminal, Set[NonTerminal]]()
+    for(nonTerm <- grammar.getNonterminals()){
+      var derivativesChanged = true
+      var nonTermDerivable = Set[NonTerminal]()
+      while(derivativesChanged){
+        val derivativesSizeBefore = nonTermDerivable.size
+        for(rule <- grammar.getRules()){
+          if(rule.isChainRule() && (rule.getLeft().equals(nonTerm) || nonTermDerivable.contains(rule.getLeft()))){
+            nonTermDerivable += NonTerminal(rule.getRight().head.getName())   // The rule is chain, so the right is just one nonTerminal
+            // Build the derivations from nonTerm to rule.getRight() / NonTerminal(rule.getRight().head.getName())
+            buildChainParses.newDerivation(nonTerm, NonTerminal(rule.getRight().head.getName())  , rule) // The rule is chain, so the right is just one nonTerminal
+          }
+        }
+        derivativesChanged = !(derivativesSizeBefore == nonTermDerivable.size)
+      }
+      derivatives(nonTerm) = nonTermDerivable
+    }
+    derivatives
+  }
+
   def eliminateChains(grammar: Grammar):Grammar = {
+    val derivatives = findDerivatives(grammar)
+    var rulesInConvertedGrammar = Set[Rule]()
+    for(rule <- grammar.getRules()){
+      if(!rule.isChainRule()){
+        rulesInConvertedGrammar += rule
+      }
+    }
+    for(nonTerm <- grammar.getNonterminals()){
+      println("nonterm: " + nonTerm)
+      for(derivative <- derivatives(nonTerm)){
+        println("derivative: " + derivative)
+        for(rule <- grammar.getRules()){
+          if(derivative == rule.getLeft() && !rule.isChainRule()){
+            val newRule = new Rule(nonTerm, rule.getRight())
+            rulesInConvertedGrammar += newRule
+            ruleUpdatingBuilder.ruleUpdated(new Rule(nonTerm, ListBuffer(derivative)), newRule, 2)
+          }
+        }
+      }
+    }
+    new Grammar(rulesInConvertedGrammar, grammar.getStartVariable())
+  }
+
+  /* private def eliminateChains2(grammar: Grammar):Grammar = {
     var newRules = Set[Rule]()
     for (rule <- grammar.getRules()){     // First run of finding new rules
       if(rule.isChainRule()){     // If a rule is a chain, something special needs to happen, otherwise it is just added to the new grammar
@@ -116,13 +169,13 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
       chainRulesInNewRules = stillChainRules
     }
     new Grammar(newRules, grammar.getStartVariable())
-  }
+  } */
 
   private def renameTerminals(tempRules: Set[Rule], newRules: Set[Rule], grammar: Grammar): (Set[Rule], Set[Rule]) ={
     var updatedTempRules = tempRules
     var updatedNewRules = newRules
     // rule can only have terminals if it is the only one
-    var noTerminalsInRuleUnlessOnlyOne = (updatedTempRules.filter(rule => (rule.getRight().filter(ruleElem => ruleElem.isInstanceOf[Terminal]).size == 0) || rule.getRight().size.equals(1))).size.equals(updatedTempRules.size)
+    var noTerminalsInRuleUnlessOnlyOne = updatedTempRules.count(rule => !rule.getRight().exists(ruleElem => ruleElem.isInstanceOf[Terminal]) || rule.getRight().size.equals(1)).equals(updatedTempRules.size)
     while (!noTerminalsInRuleUnlessOnlyOne) {
       for (rule <- updatedTempRules) {
         if (rule.isOnCNF()) {
@@ -151,7 +204,7 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
             ruleUpdatingBuilder.ruleUpdated(rule, updatedRule, 3)
           }
         }
-        noTerminalsInRuleUnlessOnlyOne = (updatedTempRules.filter(rule => (rule.getRight().filter(ruleElem => ruleElem.isInstanceOf[Terminal]).size == 0) || rule.getRight().size.equals(1))).size.equals(updatedTempRules.size)
+        noTerminalsInRuleUnlessOnlyOne = updatedTempRules.count(rule => !rule.getRight().exists(ruleElem => ruleElem.isInstanceOf[Terminal]) || rule.getRight().size.equals(1)).equals(updatedTempRules.size)
       }
     }
     return (updatedTempRules, updatedNewRules)
@@ -230,26 +283,12 @@ class ConvertToCNF(ruleUpdatingBuilder: RuleUpdatingBuilder) {
     return new Grammar(newRules, grammar.getStartVariable())
   }
 
+  def getLambdaParses(): LambdaParseBuilder ={
+    buildLambdaParses
+  }
+
+  def getRuleUpdatingBuilder(): HistoryBuilder = {
+    ruleUpdatingBuilder
+  }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,25 +1,31 @@
 package HistoryTreeArchitecture
 
 import GrammarArchitecture.{Grammar, Rule}
+import ParseTreeArchitecture.ParseTree
 
 import scala.collection.mutable.ListBuffer
 
-class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuilder {
-
-  // maintain a list of all historyTrees
+class HistoryTreeBuilder() extends HistoryBuilder {
   var historyTrees = new ListBuffer[HistoryTree]
-  // create a historyTree for each of all the original rules
-  for (rule <- originalGrammar.getRules()) {
-    historyTrees.append(HistoryTreeNode(rule, Set(HistoryTreeLeaf), 0))
+
+  override def init(grammar: Grammar): Unit = {
+    // create a historyTree for each of all the original rules
+    for (rule <- grammar.getRules()) {
+      historyTrees.append(HistoryTreeNode(rule, Set(HistoryTreeLeaf), 0))
+    }
   }
 
-  def ruleUpdated(oldRule: Rule, newRule: Rule, step: Int): Unit = {
+  override def ruleUpdated(oldRule: Rule, newRule: Rule, step: Int): Unit = {
+    if(step == 2){
+      val newTree = HistoryTreeNode(oldRule, Set(HistoryTreeNode(newRule, Set(HistoryTreeLeaf), 2)),2)
+      historyTrees += newTree
+    }
     var tree = findTreeWithRule(oldRule)
     if(tree.equals(HistoryTreeLeaf)){
       ???     //TODO: The tree does not exist
     }
     historyTrees-=tree
-    val newTree = createNewRule(tree, oldRule, newRule, step)
+    var newTree = createNewRule(tree, oldRule, newRule, step)
     historyTrees+=newTree
   }
 
@@ -30,7 +36,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
         correctTree = tree
       }
     }
-    return correctTree
+    correctTree
   }
 
   def treeContainsRule(tree: HistoryTree, rule: Rule): Boolean = {
@@ -66,7 +72,7 @@ class HistoryTreeBuilder(var originalGrammar: Grammar) extends RuleUpdatingBuild
   }
 
   def getHistoryTrees(): ListBuffer[HistoryTree] = {
-    return historyTrees
+    historyTrees
   }
 
   def getPreviousRule(rule: Rule): Rule = {

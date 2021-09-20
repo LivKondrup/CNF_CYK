@@ -1,24 +1,70 @@
 package ParseTreeArchitecture
 
+import CNFConverterArchitecture.Lambda.{LambdaParseBuilder, LambdaParses}
 import GrammarArchitecture.{NonTerminal, Rule, RuleElement}
 import HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeLeaf, HistoryTreeNode}
 
 import scala.collection.mutable.ListBuffer
+import scala.util.control.Breaks._
 
 object ParseTreeConverter {
 
-
-  def reverseTreeToOrigialGrammar(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {
+  def reverseTreeToOriginalGrammar(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder, lambdaParses: LambdaParses): ParseTree = {
     var reversedParseTree = reverseRenaming(parseTree, historyTreeBuilder)
     reversedParseTree = reverseChains(parseTree, historyTreeBuilder)
-    reversedParseTree = reverseLambda(parseTree, historyTreeBuilder)
-    ???
+    reversedParseTree = reverseLambda(parseTree, historyTreeBuilder, lambdaParses)
+    reversedParseTree
   }
 
+  def reverseLambda(tree: ParseTree, builder: HistoryTreeBuilder, lambdaParses: LambdaParseBuilder): ParseTree = {
+    tree match {
+      case ParseTreeNode(nonTerm, children) =>
+        val currentRule = getCurrentRule(nonTerm, children)
+        val prevRule = getPreviousRule(builder, nonTerm, children)
 
-  def reverseLambda(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {
-    ???
+        var childTrees: ListBuffer[ParseTree] = ListBuffer()
+        var alreadyBuild = 0
+
+        if (currentRule.getRight().length < prevRule.getRight().length){
+          // Find the new variables
+          for (i <- currentRule.getRight().indices){
+            breakable {
+              for (j <- alreadyBuild until prevRule.getRight().length) {
+                if (!(prevRule.getRight()(j) == currentRule.getRight()(i))) {
+                  // build lambda parse
+                  childTrees += lambdaParses.getLambdaParses(NonTerminal(prevRule.getRight()(j).getName()))
+                  alreadyBuild += 1
+                } else {
+                  alreadyBuild += 1
+                  break
+                }
+              }
+            }
+            // recursively build childTrees of i
+            childTrees += reverseLambda(children(i), builder, lambdaParses)
+          }
+          // building the rest of the tree
+          for (j <- alreadyBuild until prevRule.getRight().length){
+            // build the remaining lambda parses
+            childTrees += lambdaParses.getLambdaParses(NonTerminal(prevRule.getRight()(j).getName()))
+          }
+        } else {    // If there is no extra variable in previous rule
+          for(child <- children){
+            childTrees += reverseLambda(child, builder, lambdaParses)
+          }
+        }
+        ParseTreeNode(nonTerm, childTrees)
+
+      case ParseTreeLeaf(_) => tree
+    }
   }
+
+  /*def reverseChains(tree: ParseTree, builder: HistoryTreeBuilder): ParseTree = {
+    tree match {
+      case ParseTreeLeaf(name) =>
+      case ParseTreeNode(name, children) =>
+    }
+  }*/
 
   def reverseChains(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {
 
@@ -90,6 +136,14 @@ object ParseTreeConverter {
   }
 
   private def getPreviousRule(historyTreeBuilder: HistoryTreeBuilder, name: NonTerminal, children: ListBuffer[ParseTree]) = {
+    val rule = getCurrentRule(name, children)
+
+    // Find the rule previous to this rule in the history trees
+    val prevRule = historyTreeBuilder.getPreviousRule(rule)
+    prevRule
+  }
+
+  private def getCurrentRule(name: NonTerminal, children: ListBuffer[ParseTree]): Rule = {
     var rightSide: ListBuffer[RuleElement] = ListBuffer()
     for (child <- children) {
       child match {
@@ -97,11 +151,7 @@ object ParseTreeConverter {
         case ParseTreeLeaf(term) => rightSide += term
       }
     }
-    val rule = new Rule(name, rightSide)
-
-    // Find the rule previous to this rule in the history trees
-    val prevRule = historyTreeBuilder.getPreviousRule(rule)
-    prevRule
+    new Rule(name, rightSide)
   }
 
   private def treeHasRulesFromStep(tree: ParseTree, step: Int, historyTreeBuilder: HistoryTreeBuilder): Boolean = {

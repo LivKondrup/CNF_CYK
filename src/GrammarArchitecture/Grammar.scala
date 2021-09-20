@@ -1,6 +1,9 @@
 package GrammarArchitecture
 
 class Grammar(rules: Set[Rule], start:NonTerminal) {
+  var nonTerminals = Set[NonTerminal]()
+  rules.foreach(rule => nonTerminals += rule.getLeft())
+
   def hasNonTerminal(nonTerminal: NonTerminal): Boolean = {
     for (rule <- rules){
       if (rule.getLeft().equals(nonTerminal)) return true
@@ -19,6 +22,10 @@ class Grammar(rules: Set[Rule], start:NonTerminal) {
 
   def getStartVariable(): NonTerminal ={
     return start
+  }
+
+  def getNonterminals(): Set[NonTerminal] = {
+    return nonTerminals
   }
 
   @Override

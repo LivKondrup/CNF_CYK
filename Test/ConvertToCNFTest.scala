@@ -1,3 +1,5 @@
+import CNFConverterArchitecture.AbstractFactory.SimpleConverter
+import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
 import HistoryTreeArchitecture.NoUpdatingBuilder
 import org.junit.jupiter.api.{BeforeEach, Test}
@@ -6,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 class ConvertToCNFTest {
   var grammar1:Grammar = _   // A grammar for the tests to use
-  var converter = new ConvertToCNF(new NoUpdatingBuilder())
+  var converter = new ConvertToCNF(new SimpleConverter)
 
   @BeforeEach
   def setUp(): Unit ={
@@ -93,8 +95,10 @@ class ConvertToCNFTest {
     val rule17 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("b")))
     val rule18 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new Terminal("b")))
     val rules2 = Set(rule10, rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18)
-    val grammarExpected = new Grammar(rules2, new NonTerminal("S"))
-    val grammarExp2 = new Grammar(rules2, NonTerminal("S"))
+    val grammarExpected = new Grammar(rules2, NonTerminal("S"))
+
+    println("Actual:   " + grammarConverted.getRules())
+    println("Expected: " + grammarExpected.getRules())
 
     assert(grammarConverted.equals(grammarExpected))
 

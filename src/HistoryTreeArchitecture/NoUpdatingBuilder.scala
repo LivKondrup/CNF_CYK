@@ -1,9 +1,13 @@
 package HistoryTreeArchitecture
 
-import GrammarArchitecture.Rule
+import GrammarArchitecture.{Grammar, Rule}
 
-class NoUpdatingBuilder extends RuleUpdatingBuilder {
+class NoUpdatingBuilder extends HistoryBuilder {
   override def ruleUpdated(oldRule: Rule, newRule: Rule, step: Int): Unit = {
-    return
+
+  }
+
+  override def init(grammar: Grammar): Unit = {
+
   }
 }

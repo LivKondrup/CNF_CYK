@@ -1,3 +1,5 @@
+import CNFConverterArchitecture.AbstractFactory.ConverterForReversingTrees
+import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture.{Grammar, NonTerminal, Rule, Terminal}
 import HistoryTreeArchitecture.NoUpdatingBuilder
 import ParseTreeArchitecture.{ParseTreeLeaf, ParseTreeNode}
@@ -125,7 +127,7 @@ class CYKParserTest {
     val rule4 = new Rule(NonTerminal("C"), ListBuffer(Terminal("c")))
     val grammar = new Grammar(Set(rule1, rule2, rule3, rule4), NonTerminal("S"))
 
-    val grammarCNF = new ConvertToCNF(new NoUpdatingBuilder).getGrammarOnCNF(grammar)
+    val grammarCNF = new ConvertToCNF(new ConverterForReversingTrees()).getGrammarOnCNF(grammar)
 
 
     assert(CYKParser.canParse("abc", grammarCNF))

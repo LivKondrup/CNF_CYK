@@ -1,3 +1,5 @@
+import CNFConverterArchitecture.AbstractFactory.SimpleConverter
+import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
 import HistoryTreeArchitecture.NoUpdatingBuilder
 import org.junit.jupiter.api.{BeforeEach, Test}
@@ -8,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 // Most of these tests are of grammars from exercises in John Martin, Introduction to Languages and the Theory of Computation
 
 class MoreTests {
-  var converter = new ConvertToCNF(new NoUpdatingBuilder())
+  var converter = new ConvertToCNF(new SimpleConverter())
   @Test
   def example1():Unit = {
     val rule1 = new Rule(NonTerminal("S"), ListBuffer(Lambda()))
