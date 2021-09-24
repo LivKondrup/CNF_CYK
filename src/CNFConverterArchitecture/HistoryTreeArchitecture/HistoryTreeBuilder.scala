@@ -1,4 +1,4 @@
-package HistoryTreeArchitecture
+package CNFConverterArchitecture.HistoryTreeArchitecture
 
 import GrammarArchitecture.{Grammar, Rule}
 import ParseTreeArchitecture.ParseTree

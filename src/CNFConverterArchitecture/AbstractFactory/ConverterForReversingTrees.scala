@@ -2,12 +2,38 @@ package CNFConverterArchitecture.AbstractFactory
 import CNFConverterArchitecture.Chain.{ChainParseBuilder, ChainParses}
 import CNFConverterArchitecture.Lambda.{LambdaParseBuilder, LambdaParses}
 import GrammarArchitecture.Grammar
-import HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryBuilder}
+import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryBuilder}
 
 class ConverterForReversingTrees() extends CNFConverterFactory {
-  override def createLambdaParseBuilder(): LambdaParseBuilder = new LambdaParses()
+  private var lambdaParses:LambdaParses = _
+  private var chainParses:ChainParses = _
+  private var builder:HistoryTreeBuilder = _
 
-  override def createChainParseBuilder(): ChainParseBuilder = new ChainParses()
+  override def createLambdaParseBuilder(): LambdaParseBuilder = {
+    lambdaParses = new LambdaParses()
+    lambdaParses
+  }
 
-  override def createHistoryTreeBuilder(): HistoryBuilder = new HistoryTreeBuilder()
+  override def createChainParseBuilder(): ChainParseBuilder = {
+    chainParses = new ChainParses()
+    chainParses
+  }
+
+  override def createHistoryTreeBuilder(): HistoryBuilder = {
+    builder = new HistoryTreeBuilder()
+    builder
+  }
+
+  def getLambdaParses: LambdaParses = {
+    lambdaParses
+  }
+
+  def getChainParses: ChainParses = {
+    chainParses
+  }
+
+  def getHistoryTreeBuilder: HistoryTreeBuilder = {
+    builder
+  }
+
 }

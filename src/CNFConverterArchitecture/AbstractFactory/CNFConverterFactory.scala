@@ -2,7 +2,7 @@ package CNFConverterArchitecture.AbstractFactory
 
 import CNFConverterArchitecture.Chain.ChainParseBuilder
 import CNFConverterArchitecture.Lambda.LambdaParseBuilder
-import HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryBuilder}
+import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryBuilder}
 
 trait CNFConverterFactory {
   def createLambdaParseBuilder(): LambdaParseBuilder

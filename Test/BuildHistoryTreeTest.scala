@@ -1,26 +1,22 @@
-import CNFConverterArchitecture.AbstractFactory.ConverterForReversingTrees
+import CNFConverterArchitecture.AbstractFactory.{ConverterForReversingTrees, SimpleConverter}
 import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
-import HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeLeaf, HistoryTreeNode}
+import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeLeaf, HistoryTreeNode}
 import org.junit.jupiter.api.{BeforeAll, BeforeEach, Test}
 
 import scala.collection.mutable.ListBuffer
 
 class BuildHistoryTreeTest {
-  var builder: HistoryTreeBuilder = _
-  var grammar:Grammar = _
 
-  @BeforeEach
-  def setUp(): Unit = {
-    val rule1 = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("B")))
-    val rule2 = new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A")))
-    val rule3 = new Rule(NonTerminal("B"), ListBuffer(NonTerminal("B"), Terminal("b")))
-    grammar = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
-    builder = new HistoryTreeBuilder()
-  }
 
   @Test
   def isSetUpCorrect(): Unit = {
+    val rule1 = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("B")))
+    val rule2 = new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A")))
+    val rule3 = new Rule(NonTerminal("B"), ListBuffer(NonTerminal("B"), Terminal("b")))
+    val grammar = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
+
+    val builder = new HistoryTreeBuilder()
     builder.init(grammar)
     val trees = builder.getHistoryTrees()
     val expectedTree1 = new HistoryTreeNode(new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("B"))), Set(HistoryTreeLeaf), 0)
@@ -35,9 +31,16 @@ class BuildHistoryTreeTest {
 
   @Test
   def UpdatesCorrectly(): Unit = {
+    val rule1 = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("B")))
+    val rule2 = new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A")))
+    val rule3 = new Rule(NonTerminal("B"), ListBuffer(NonTerminal("B"), Terminal("b")))
+    val grammar = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
+
     val oldRule = new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A")))
     val newRule = new Rule(NonTerminal("A"), ListBuffer(NonTerminal("C"), NonTerminal("A")))
-    builder = new HistoryTreeBuilder()
+
+    val builder = new HistoryTreeBuilder()
+
     builder.init(grammar)
     builder.ruleUpdated(oldRule, newRule, 1)
     val trees = builder.getHistoryTrees()
@@ -53,9 +56,11 @@ class BuildHistoryTreeTest {
     val rule3 = new Rule(NonTerminal("A"), ListBuffer(Lambda()))
     val rule4 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
     val grammar = new Grammar(Set(rule1, rule2, rule3, rule4), NonTerminal("S"))
-    val converter = new ConvertToCNF(new ConverterForReversingTrees())
 
-    builder = converter.getRuleUpdatingBuilder().asInstanceOf[HistoryTreeBuilder]
+    val factory = new ConverterForReversingTrees()
+    val converter = new ConvertToCNF(factory)
+
+    val builder = factory.getHistoryTreeBuilder
     builder.init(grammar)
     converter.eliminateLambda(grammar)
 
@@ -73,28 +78,31 @@ class BuildHistoryTreeTest {
     val rule2 = new Rule(NonTerminal("A"), ListBuffer(NonTerminal("B")))
     val rule3 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
     val grammar = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
-    val converter = new ConvertToCNF(new ConverterForReversingTrees())
 
+    val factory = new ConverterForReversingTrees()
+    val converter = new ConvertToCNF(factory)
+
+    val builder = factory.getHistoryTreeBuilder
     builder.init(grammar)
-    builder = converter.getRuleUpdatingBuilder().asInstanceOf[HistoryTreeBuilder]
     converter.eliminateChains(grammar)
 
     val treeSB = builder.findTreeWithRule(new Rule(NonTerminal("S"), ListBuffer(Terminal("b"))))
-    assert(builder.treeContainsRule(treeSB, new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B")))))
+    assert(builder.treeContainsRule(treeSB, new Rule(NonTerminal("S"), ListBuffer(Lambda(), NonTerminal("B")))))
   }
 
+  // tests that the builder has the rule that is expected to replace the rule that is not on CNF
   @Test
   def renamesCorrectly(): Unit = {
     val rule1 = new Rule(NonTerminal("S"), ListBuffer(Terminal("a"), NonTerminal("B")))
     val rule2 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
     val grammar = new Grammar(Set(rule1, rule2), NonTerminal("S"))
-    val converter = new ConvertToCNF(new ConverterForReversingTrees())
 
-    builder = converter.getRuleUpdatingBuilder().asInstanceOf[HistoryTreeBuilder]
+    val factory = new ConverterForReversingTrees()
+    val converter = new ConvertToCNF(factory)
+
+    val builder = factory.getHistoryTreeBuilder
     builder.init(grammar)
     converter.fixRightSides(grammar)
-
-    val trees = builder.getHistoryTrees()
 
     // S rule tree has S->AB
     val treeS = builder.findTreeWithRule(rule1)
@@ -110,10 +118,11 @@ class BuildHistoryTreeTest {
     val rule4 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
     val grammar = new Grammar(Set(rule1, rule2, rule3, rule4), NonTerminal("S"))
 
-    val converter = new ConvertToCNF(new ConverterForReversingTrees())
+    val factory = new ConverterForReversingTrees()
+    val converter = new ConvertToCNF(factory)
 
-    builder = converter.getRuleUpdatingBuilder().asInstanceOf[HistoryTreeBuilder]
-    builder.init(grammar)
+    val builder = factory.getHistoryTreeBuilder
+
     converter.getGrammarOnCNF(grammar)
 
     // S rule tree has S->B
@@ -123,6 +132,6 @@ class BuildHistoryTreeTest {
 
     // the tree with the rule S->b also has S->B
     val treeSB = builder.findTreeWithRule(new Rule(NonTerminal("S"), ListBuffer(Terminal("b"))))
-    assert(builder.treeContainsRule(treeSB, new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B")))))
+    assert(builder.treeContainsRule(treeSB, new Rule(NonTerminal("S"), ListBuffer(Lambda(), NonTerminal("B")))))
   }
 }

@@ -1,10 +1,10 @@
 package CNFConverterArchitecture
 
 import CNFConverterArchitecture.AbstractFactory.CNFConverterFactory
-import CNFConverterArchitecture.Chain.ChainParses
+import CNFConverterArchitecture.Chain.{ChainParseBuilder, ChainParses}
 import CNFConverterArchitecture.Lambda.{LambdaParseBuilder, LambdaParses}
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, RuleElement, Terminal}
-import HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryBuilder}
+import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryBuilder, HistoryTreeBuilder}
 
 import scala.collection.mutable.{HashMap, ListBuffer}
 
@@ -112,14 +112,12 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
       }
     }
     for(nonTerm <- grammar.getNonterminals()){
-      println("nonterm: " + nonTerm)
       for(derivative <- derivatives(nonTerm)){
-        println("derivative: " + derivative)
         for(rule <- grammar.getRules()){
           if(derivative == rule.getLeft() && !rule.isChainRule()){
             val newRule = new Rule(nonTerm, rule.getRight())
             rulesInConvertedGrammar += newRule
-            ruleUpdatingBuilder.ruleUpdated(new Rule(nonTerm, ListBuffer(derivative)), newRule, 2)
+            ruleUpdatingBuilder.ruleUpdated(new Rule(nonTerm, ListBuffer(Lambda(), derivative)), newRule, 2)    // Lambda is added to be able to differentiate this from an actual rule nonterm -> derivative
           }
         }
       }
@@ -281,14 +279,6 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
     newRules = simplifiedRules._2
 
     return new Grammar(newRules, grammar.getStartVariable())
-  }
-
-  def getLambdaParses(): LambdaParseBuilder ={
-    buildLambdaParses
-  }
-
-  def getRuleUpdatingBuilder(): HistoryBuilder = {
-    ruleUpdatingBuilder
   }
 
 }

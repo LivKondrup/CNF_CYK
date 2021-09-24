@@ -1,17 +1,18 @@
 package ParseTreeArchitecture
 
+import CNFConverterArchitecture.Chain.ChainParses
 import CNFConverterArchitecture.Lambda.{LambdaParseBuilder, LambdaParses}
-import GrammarArchitecture.{NonTerminal, Rule, RuleElement}
-import HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeLeaf, HistoryTreeNode}
+import GrammarArchitecture.{Lambda, NonTerminal, Rule, RuleElement, Terminal}
+import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryTree, HistoryTreeBuilder, HistoryTreeLeaf, HistoryTreeNode}
 
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
 object ParseTreeConverter {
 
-  def reverseTreeToOriginalGrammar(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder, lambdaParses: LambdaParses): ParseTree = {
+  def reverseTreeToOriginalGrammar(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder, lambdaParses: LambdaParses, chainParses: ChainParses): ParseTree = {
     var reversedParseTree = reverseRenaming(parseTree, historyTreeBuilder)
-    reversedParseTree = reverseChains(parseTree, historyTreeBuilder)
+    reversedParseTree = reverseChains(parseTree, historyTreeBuilder, chainParses)
     reversedParseTree = reverseLambda(parseTree, historyTreeBuilder, lambdaParses)
     reversedParseTree
   }
@@ -24,6 +25,10 @@ object ParseTreeConverter {
 
         var childTrees: ListBuffer[ParseTree] = ListBuffer()
         var alreadyBuild = 0
+
+        if(prevRule == null){   //
+
+        }
 
         if (currentRule.getRight().length < prevRule.getRight().length){
           // Find the new variables
@@ -59,14 +64,41 @@ object ParseTreeConverter {
     }
   }
 
-  /*def reverseChains(tree: ParseTree, builder: HistoryTreeBuilder): ParseTree = {
-    tree match {
-      case ParseTreeLeaf(name) =>
-      case ParseTreeNode(name, children) =>
-    }
-  }*/
+  def reverseChains(tree: ParseTree, builder: HistoryTreeBuilder, parses: ChainParses): ParseTree ={
+    reverseChainsOfSubTrees(tree, builder, parses).head
+  }
 
-  def reverseChains(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {
+  def reverseChainsOfSubTrees(tree: ParseTree, builder: HistoryTreeBuilder, chainParses: ChainParses): ListBuffer[ParseTree] = {
+    tree match {
+      case ParseTreeLeaf(name) => ListBuffer(ParseTreeLeaf(name))
+      case ParseTreeNode(name, children) =>
+        val prevRule = getPreviousRule(builder, name, children)
+        val childTrees: ListBuffer[ParseTree] = ListBuffer()
+
+        for (child <- children) {
+          val newChild = reverseChainsOfSubTrees(child, builder, chainParses)
+          childTrees ++= newChild
+        }
+
+        if(prevRule.getRight().head == Lambda() && prevRule.getRight().length == 2){    // A chain rule with lambda in front (the way derivations are represented)
+          var chainTree = chainParses.getParses()((prevRule.getLeft(), NonTerminal(prevRule.getRight()(1).getName())))  // prevRule is chainRule derivation, so right side is nonTerminal with lambda in front
+          // add chainTree as parent to childTrees
+          return ListBuffer(addChildrenToBottomOfChainTree(chainTree, childTrees))
+        }
+
+        return childTrees
+    }
+  }
+
+  // assumes that tree is a chain tree
+  def addChildrenToBottomOfChainTree(tree: ParseTree, children: ListBuffer[ParseTree]): ParseTree = {
+    tree match {
+      case ParseTreeNode(name, nodeChildren) => ParseTreeNode(name, ListBuffer(addChildrenToBottomOfChainTree(nodeChildren.head, children)))  // There is only one child in nodeChildren since the tree is a chain tree
+      case ParseTreeLeaf(name) => ParseTreeNode(NonTerminal(name.getName()), children)  // The input tree is a chain tree of only nonterminals
+    }
+  }
+
+  /*def reverseChains2(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {
 
     var treeWithChainRules = reverseChainsOfSubTrees(parseTree, historyTreeBuilder)
 
@@ -103,7 +135,7 @@ object ParseTreeConverter {
         }
       case ParseTreeLeaf(term) => ListBuffer(ParseTreeLeaf(term))
     }
-  }
+  }*/
 
   // TODO: does not check if reversal is in correct step
   def reverseRenaming(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ParseTree = {

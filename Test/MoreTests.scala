@@ -1,7 +1,7 @@
 import CNFConverterArchitecture.AbstractFactory.SimpleConverter
 import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
-import HistoryTreeArchitecture.NoUpdatingBuilder
+import CNFConverterArchitecture.HistoryTreeArchitecture.NoUpdatingBuilder
 import org.junit.jupiter.api.{BeforeEach, Test}
 
 import scala.collection.mutable
