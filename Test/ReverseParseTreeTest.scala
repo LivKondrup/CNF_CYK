@@ -105,9 +105,6 @@ class ReverseParseTreeTest {
     val reversedParseTreeActual = ParseTreeConverter.reverseChains(treeAfterCYK, historyTreeBuilder, chainParses)
     val reversedTreeExpected = ParseTreeNode(NonTerminal("S"), ListBuffer(ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Terminal("a"))))))
 
-    println("Actual:   ", reversedParseTreeActual)
-    println("Expected: ", reversedTreeExpected)
-
     assert(reversedParseTreeActual == reversedTreeExpected)
   }
 
@@ -154,9 +151,6 @@ class ReverseParseTreeTest {
       ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Lambda()))),
       ParseTreeNode(NonTerminal("B"), ListBuffer(ParseTreeLeaf(Terminal("b"))))
     ))
-
-    println("Actual:   " + reversedParseTreeActual)
-    println("Expected: " + reversedTreeExpected)
 
     assert(reversedParseTreeActual == reversedTreeExpected)
   }

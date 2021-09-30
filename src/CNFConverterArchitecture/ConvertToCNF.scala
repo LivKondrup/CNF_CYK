@@ -6,7 +6,9 @@ import CNFConverterArchitecture.Lambda.{LambdaParseBuilder, LambdaParses}
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, RuleElement, Terminal}
 import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryBuilder, HistoryTreeBuilder}
 
+import scala.collection.IterableOnce.iterableOnceExtensionMethods
 import scala.collection.mutable.{HashMap, ListBuffer}
+import scala.util.control.Breaks._
 
 class ConvertToCNF(CNFFactory: CNFConverterFactory) {
   private val buildLambdaParses = CNFFactory.createLambdaParseBuilder()
@@ -22,7 +24,77 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
     convertedGrammar
   }
 
-  def eliminateLambda(grammar:Grammar):Grammar = {
+  private def makeLambdaRules(rule: Rule, nullables: Set[RuleElement], grammar: Grammar): Set[Rule] = {
+    var newRules = Set[Rule]()
+    var idxOfLastNonterm = -1
+    var freshNonTerm = rule.getLeft()
+    breakable{
+      for(i <- rule.getRight().indices){
+        val elem = rule.getRight()(i)
+        if(nullables.contains(elem)){
+          val freshNonTerm2 = getFreshNonTerminal(new Grammar(grammar.getRules().concat(newRules), grammar.getStartVariable()))
+          val restOfRule = rule.getRight().clone().slice(i+1, rule.getRight().length)
+          val restOfRightSideHasNullables = restOfRule.intersect(nullables.toList).nonEmpty
+          if (!restOfRightSideHasNullables){   // Current is last nullable
+            val ruleElemsSinceLastNonTerm = rule.getRight().clone().slice(idxOfLastNonterm+1, i)
+            val ruleElemsAfterThisNonTerm = rule.getRight().clone().slice(i+1, rule.getRight().length)
+            val rule1 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += elem)
+            val rule2 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() ++= ruleElemsAfterThisNonTerm)
+            if(rule1.getRight().nonEmpty){
+              newRules += rule1
+              ruleUpdatingBuilder.ruleUpdated(rule, rule1, 1)
+            }
+            if(rule2.getRight().nonEmpty){
+              newRules += rule2
+              ruleUpdatingBuilder.ruleUpdated(rule, rule2, 1)
+            }
+            idxOfLastNonterm = i
+            break
+          }
+          val ruleElemsSinceLastNonTerm = rule.getRight().clone().slice(idxOfLastNonterm+1, i)
+          val rule1 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += elem += freshNonTerm2)
+          val rule2 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += freshNonTerm2)
+          if(rule1.getRight().nonEmpty){
+            newRules += rule1
+            ruleUpdatingBuilder.ruleUpdated(rule, rule1, 1)
+          }
+          if(rule2.getRight().nonEmpty){
+            newRules += rule2
+            ruleUpdatingBuilder.ruleUpdated(rule, rule2, 1)
+          }
+          idxOfLastNonterm = i
+          freshNonTerm = freshNonTerm2
+        }
+      }
+    }
+    newRules
+  }
+
+  def eliminateLambda(grammar: Grammar): Grammar = {
+    var newRules = Set[Rule]()
+    val originalRules = grammar.getRules()
+    val nullables = findNullables(grammar)
+
+    for(rule <- originalRules){
+      if(rule.getRight().intersect(nullables.toList).nonEmpty){   // Rule has nullables
+        val newRulesFromCurrentRule = makeLambdaRules(rule, nullables, new Grammar(grammar.getRules().concat(newRules), grammar.getStartVariable()))
+        newRules ++= newRulesFromCurrentRule
+      } else if (!(rule.getRight().head == Lambda())) {    // Rule has no nullables and is not lambda
+        newRules += rule
+      }
+    }
+
+    for (rule <- newRules){   // Remove lambda rules and rules that have nothing on right-hand side
+      if(rule.getRight().isEmpty || rule.getRight().head == Lambda()){
+        newRules -= rule
+      }
+    }
+
+
+    new Grammar(newRules, grammar.getStartVariable())
+  }
+
+  def eliminateLambda2(grammar:Grammar):Grammar = {
     val nullable: Set[RuleElement] = findNullables(grammar)
     var rulesInNewGrammar = Set[Rule]()
 

@@ -22,17 +22,20 @@ class ConvertToCNFTest {
   }
 
   @Test def grammarCorrectAfterRemoveLambdaMethod(): Unit = {
-    val rule6:Rule = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A")))   // Rules of the grammar that grammar1 should be converted to
-    val rule7:Rule = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("B")))
-    val rule8:Rule = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("A"), new NonTerminal("B")))
+    val rule6:Rule = new Rule(new NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("AA")))   // Rules of the grammar that grammar1 should be converted to
+    val rule7:Rule = new Rule(new NonTerminal("S"), ListBuffer(new NonTerminal("AA")))
     val rule9:Rule = new Rule(new NonTerminal("A"), ListBuffer(new NonTerminal("B")))
     val rule10:Rule = new Rule(new NonTerminal("A"), ListBuffer(new Terminal("a")))
     val rule11:Rule = new Rule(new NonTerminal("A"), ListBuffer(new Terminal("a") ,new NonTerminal("A")))
     val rule12:Rule = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("b")))
+    val rule13 = new Rule(NonTerminal("AA"), ListBuffer(NonTerminal("B")))
 
-    val rules2: Set[Rule] = Set(rule6, rule7, rule8, rule9, rule10, rule11, rule12)
+    val rules2: Set[Rule] = Set(rule6, rule7, rule9, rule10, rule11, rule12, rule13)
     val grammarExpected: Grammar = new Grammar(rules2, new NonTerminal("S"))
     val grammarConverted = converter.eliminateLambda(grammar1)
+
+    println("Actual:   ", grammarConverted.getRules())
+    println("Expected: ", grammarExpected.getRules())
 
     assert(grammarConverted.equals(grammarExpected))
   }
@@ -96,9 +99,6 @@ class ConvertToCNFTest {
     val rule18 = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("a"), new Terminal("b")))
     val rules2 = Set(rule10, rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18)
     val grammarExpected = new Grammar(rules2, NonTerminal("S"))
-
-    println("Actual:   " + grammarConverted.getRules())
-    println("Expected: " + grammarExpected.getRules())
 
     assert(grammarConverted.equals(grammarExpected))
 

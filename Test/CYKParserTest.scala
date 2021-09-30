@@ -133,7 +133,6 @@ class CYKParserTest {
     assert(CYKParser.canParse("abc", grammarCNF))
 
     val tree = CYKParser.parseAndGetParseTree("abc", grammarCNF)
-    println(tree)
     val expectedTree = ParseTreeNode(NonTerminal("S"), ListBuffer(
       ParseTreeNode(NonTerminal("AA"), ListBuffer(
         ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Terminal("a")))),
@@ -141,7 +140,6 @@ class CYKParserTest {
       )),
       ParseTreeNode(NonTerminal("C"), ListBuffer(ParseTreeLeaf(Terminal("c"))))
     ))
-    println(expectedTree)
 
     assert(tree.equals(expectedTree))
   }

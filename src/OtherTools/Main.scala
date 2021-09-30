@@ -10,7 +10,6 @@ object Main {
     ruleElems += NonTerminal("A")
     ruleElems += Terminal("A")
 
-    ruleElems.foreach(elem => println(elem == NonTerminal("A")))
 
   }
 }

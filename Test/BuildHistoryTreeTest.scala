@@ -64,12 +64,12 @@ class BuildHistoryTreeTest {
     builder.init(grammar)
     converter.eliminateLambda(grammar)
 
+    // It is expected that the tree with rule S->AB in the root has the rule S->B
     val trees = builder.getHistoryTrees()
-    val newRuleNode = HistoryTreeNode(new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B"))), Set(HistoryTreeLeaf), 1)
-    val originalRuleNode = HistoryTreeNode(rule1, Set(HistoryTreeLeaf), 1)
-    val expectedTreeFromSRule = HistoryTreeNode(rule1, Set(HistoryTreeLeaf, originalRuleNode, newRuleNode), 0)
+    val treeS_AB = builder.findTreeWithRule(rule1)
+    val ruleSB = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B")))
 
-    assert(trees.contains(expectedTreeFromSRule))
+    assert(builder.treeContainsRule(treeS_AB, ruleSB))
   }
 
   @Test
