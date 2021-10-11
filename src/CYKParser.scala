@@ -5,6 +5,7 @@ import ParseTreeArchitecture.{ParseTree, ParseTreeLeaf, ParseTreeNode}
 import org.graalvm.compiler.word.Word
 
 import scala.collection.IterableOnce.iterableOnceExtensionMethods
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 object CYKParser {
@@ -13,7 +14,6 @@ object CYKParser {
   def parseAndGetParseTree(word: String, grammar: Grammar): ParseTree = {
     val parseArray = parseAndGetArray(word, grammar)
     val parseTree = getParseTreeFromParseArray(parseArray, grammar, 0, 0, word)
-    val a = 0
     parseTree
   }
 
@@ -25,13 +25,14 @@ object CYKParser {
         currentNonTerminal = grammar.getStartVariable()
       }
 
-      val pairsThatMightDeriveThis = combineUsefulPairs(parseArray, i, j).asInstanceOf[ListBuffer[ListBuffer[RuleElement]]]
+      val pairsThatMightDeriveThis = combineUsefulPairs(parseArray, i, j).asInstanceOf[ListBuffer[(ListBuffer[RuleElement], Int)]]
       val usefulRulesRightSide = grammar.getRules().filter(rule => rule.getLeft().equals(currentNonTerminal)).map(rule => rule.getRight())
-      val usefulPairs = pairsThatMightDeriveThis.filter(pair => usefulRulesRightSide.contains(pair))
+      val usefulPairs = pairsThatMightDeriveThis.filter(pair => usefulRulesRightSide.contains(pair._1))
 
-      val indexOfUseFulPair = pairsThatMightDeriveThis.indexOf(usefulPairs.head)
+      val indexOfUseFulPair = usefulPairs.head._2
+      val amountOfDifferentEntriesForUseFulPairs = pairsThatMightDeriveThis.map(elem => elem._2).max +1
 
-      val posLefti = i+pairsThatMightDeriveThis.length-indexOfUseFulPair
+      val posLefti = i+amountOfDifferentEntriesForUseFulPairs-indexOfUseFulPair
 
       val leftTree = getParseTreeFromParseArray(parseArray, grammar, posLefti, j, word)
       val rightTree= getParseTreeFromParseArray(parseArray, grammar, i+indexOfUseFulPair+1, j+indexOfUseFulPair+1, word)
@@ -69,7 +70,7 @@ object CYKParser {
   private def fillRest(grammar: Grammar, parseArray: Array[Array[ListBuffer[NonTerminal]]], wordLen: Int): Array[Array[ListBuffer[NonTerminal]]] = {
     for(i<-(wordLen-2) to 0 by -1; j<-0 until wordLen){
       if(j<=i){
-        val toSearchFor = ListBufferTools.combineUsefulPairs(parseArray, i, j)
+        val toSearchFor = ListBufferTools.combineUsefulPairs(parseArray, i, j).map(pair => pair._1)
         val usefulRules = grammar.getRules().filter(rule => toSearchFor.contains(rule.getRight()))
         val usefulNonTerminals = usefulRules.map(rule => rule.getLeft())
         val listOfUsefulNonTerminals = ListBuffer.empty ++= usefulNonTerminals
