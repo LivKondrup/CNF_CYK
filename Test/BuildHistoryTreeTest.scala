@@ -17,8 +17,8 @@ class BuildHistoryTreeTest {
     val grammar = new Grammar(Set(rule1, rule2, rule3), NonTerminal("S"))
 
     val builder = new HistoryTreeBuilder()
-    builder.init(grammar)
-    val trees = builder.getHistoryTrees()
+    builder.init(grammar, 1)
+    val trees = builder.getHistoryTrees(1)
     val expectedTree1 = new HistoryTreeNode(new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("B"))), Set(HistoryTreeLeaf), 0)
     assert(trees.contains(expectedTree1))
 
@@ -41,9 +41,9 @@ class BuildHistoryTreeTest {
 
     val builder = new HistoryTreeBuilder()
 
-    builder.init(grammar)
+    builder.init(grammar, 1)
     builder.ruleUpdated(oldRule, newRule, 1)
-    val trees = builder.getHistoryTrees()
+    val trees = builder.getHistoryTrees(1)
     val expectedNewChildren:Set[HistoryTree] = Set(HistoryTreeLeaf, HistoryTreeNode(newRule, Set(HistoryTreeLeaf), 1))
     val expectedNewTree = new HistoryTreeNode(new Rule(NonTerminal("A"), ListBuffer(Terminal("a"), NonTerminal("A"))), expectedNewChildren, 0)
     assert (trees.contains(expectedNewTree))
@@ -61,12 +61,12 @@ class BuildHistoryTreeTest {
     val converter = new ConvertToCNF(factory)
 
     val builder = factory.getHistoryTreeBuilder
-    builder.init(grammar)
+    builder.init(grammar, 1)
     converter.eliminateLambda(grammar)
 
     // It is expected that the tree with rule S->AB in the root has the rule S->B
-    val trees = builder.getHistoryTrees()
-    val treeS_AB = builder.findTreeWithRule(rule1)
+    val trees = builder.getHistoryTrees(1)
+    val treeS_AB = builder.findTreeWithRule(rule1, 1)
     val ruleSB = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B")))
 
     assert(builder.treeContainsRule(treeS_AB, ruleSB))
@@ -83,10 +83,10 @@ class BuildHistoryTreeTest {
     val converter = new ConvertToCNF(factory)
 
     val builder = factory.getHistoryTreeBuilder
-    builder.init(grammar)
+    builder.init(grammar, 2)
     converter.eliminateChains(grammar)
 
-    val treeSB = builder.findTreeWithRule(new Rule(NonTerminal("S"), ListBuffer(Terminal("b"))))
+    val treeSB = builder.findTreeWithRule(new Rule(NonTerminal("S"), ListBuffer(Terminal("b"))), 2)
     assert(builder.treeContainsRule(treeSB, new Rule(NonTerminal("S"), ListBuffer(Lambda(), NonTerminal("B")))))
   }
 
@@ -101,11 +101,11 @@ class BuildHistoryTreeTest {
     val converter = new ConvertToCNF(factory)
 
     val builder = factory.getHistoryTreeBuilder
-    builder.init(grammar)
+    builder.init(grammar, 3)
     converter.fixRightSides(grammar)
 
     // S rule tree has S->AB
-    val treeS = builder.findTreeWithRule(rule1)
+    val treeS = builder.findTreeWithRule(rule1, 3)
     val expectedSRule = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("AA"), NonTerminal("B")))   // AA is the first available new name for a variable
     assert(builder.treeContainsRule(treeS, expectedSRule))
   }
@@ -125,13 +125,8 @@ class BuildHistoryTreeTest {
 
     converter.getGrammarOnCNF(grammar)
 
-    // S rule tree has S->B
-    val treeS = builder.findTreeWithRule(rule1)
-    val expectedSBRule = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("B")))
-    assert(builder.treeContainsRule(treeS, expectedSBRule))
-
     // the tree with the rule S->b also has S->B
-    val treeSB = builder.findTreeWithRule(new Rule(NonTerminal("S"), ListBuffer(Terminal("b"))))
+    val treeSB = builder.findTreeWithRule(new Rule(NonTerminal("S"), ListBuffer(Terminal("b"))), 2)
     assert(builder.treeContainsRule(treeSB, new Rule(NonTerminal("S"), ListBuffer(Lambda(), NonTerminal("B")))))
   }
 }

@@ -9,7 +9,9 @@ object Main {
     var ruleElems = ListBuffer[RuleElement]()
     ruleElems += NonTerminal("A")
     ruleElems += Terminal("A")
-
+    var elems2 = ruleElems
+    elems2 += NonTerminal("B")
+    println(ruleElems)
 
   }
 }

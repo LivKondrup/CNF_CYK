@@ -30,9 +30,9 @@ object ParseTreeConverter {
         }
         var currentRule = getCurrentRule(name, children)
 
-        val prevRule = getPreviousRule(historyTreeBuilder, name, children)
+        val prevRule = getPreviousRule(historyTreeBuilder, name, children, 1)
 
-        val currentRuleIsInAHistoryTree = historyTreeBuilder.findTreeWithRule(currentRule) != HistoryTreeLeaf
+        val currentRuleIsInAHistoryTree = historyTreeBuilder.findTreeWithRule(currentRule, 1) != HistoryTreeLeaf
         val prevRuleExists = prevRule != null
         if(!currentRuleIsInAHistoryTree){   // The previous rule is not an original rule (or the top layer of a lambda rule), so just pass the child-trees on the the next layer of the tree
           return childTrees
@@ -76,7 +76,7 @@ object ParseTreeConverter {
     tree match {
       case ParseTreeNode(nonTerm, children) =>
         val currentRule = getCurrentRule(nonTerm, children)
-        val prevRule = getPreviousRule(builder, nonTerm, children)
+        val prevRule = getPreviousRule(builder, nonTerm, children, 1)
 
         var childTrees: ListBuffer[ParseTree] = ListBuffer()
         var alreadyBuild = 0
@@ -123,7 +123,7 @@ object ParseTreeConverter {
     tree match {
       case ParseTreeLeaf(name) => ListBuffer(ParseTreeLeaf(name))
       case ParseTreeNode(name, children) =>
-        val prevRule = getPreviousRule(builder, name, children)
+        val prevRule = getPreviousRule(builder, name, children, 2)
         val childTrees: ListBuffer[ParseTree] = ListBuffer()
 
         for (child <- children) {
@@ -136,7 +136,6 @@ object ParseTreeConverter {
           // add chainTree as parent to childTrees
           return ListBuffer(addChildrenToBottomOfChainTree(chainTree, childTrees))
         }
-
         return childTrees
     }
   }
@@ -158,7 +157,7 @@ object ParseTreeConverter {
     parseTree match {
       case ParseTreeNode(name, children) =>
         // Build the rule at the root of the current tree
-        val prevRule: Rule = getPreviousRule(historyTreeBuilder, name, children)
+        val prevRule: Rule = getPreviousRule(historyTreeBuilder, name, children, 3)
 
         // Recursively reverse the child trees
         val childTrees: ListBuffer[ParseTree] = ListBuffer()
@@ -170,7 +169,7 @@ object ParseTreeConverter {
         // If the previous rule exist (meaning it wasn't only invented for renaming)
         // Combine the current root with the converted child trees
         val currentRule = getCurrentRule(name, children)
-        val currentRuleExistsInHistoryTrees = historyTreeBuilder.findTreeWithRule(currentRule) != HistoryTreeLeaf
+        val currentRuleExistsInHistoryTrees = historyTreeBuilder.findTreeWithRule(currentRule, 3) != HistoryTreeLeaf
         if (currentRuleExistsInHistoryTrees) {
           ListBuffer(ParseTreeNode(name, childTrees))
         } else { // The rule was invented for renaming and the list of reversed subtrees, should just be passed on to the parent (this part is where layers are decreased)
@@ -180,11 +179,11 @@ object ParseTreeConverter {
     }
   }
 
-  private def getPreviousRule(historyTreeBuilder: HistoryTreeBuilder, name: NonTerminal, children: ListBuffer[ParseTree]) = {
+  private def getPreviousRule(historyTreeBuilder: HistoryTreeBuilder, name: NonTerminal, children: ListBuffer[ParseTree], step:Int) = {
     val rule = getCurrentRule(name, children)
 
     // Find the rule previous to this rule in the history trees
-    val prevRule = historyTreeBuilder.getPreviousRule(rule)
+    val prevRule = historyTreeBuilder.getPreviousRule(rule, step)
     prevRule
   }
 
@@ -199,7 +198,7 @@ object ParseTreeConverter {
     new Rule(name, rightSide)
   }
 
-  private def treeHasRulesFromStep(tree: ParseTree, step: Int, historyTreeBuilder: HistoryTreeBuilder): Boolean = {
+  /*private def treeHasRulesFromStep(tree: ParseTree, step: Int, historyTreeBuilder: HistoryTreeBuilder): Boolean = {
     tree match {
       case ParseTreeNode(nonTerminal, children) =>
         val rightSide: ListBuffer[RuleElement] = children.map{
@@ -221,7 +220,7 @@ object ParseTreeConverter {
       case ParseTreeLeaf(term) => return false
     }
     false
-  }
+  }*/
 
   private def findStepOfRuleInTree(rule: Rule, historyTree: HistoryTree): Int ={
     historyTree match {

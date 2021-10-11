@@ -7,7 +7,7 @@ class NoUpdatingBuilder extends HistoryBuilder {
 
   }
 
-  override def init(grammar: Grammar): Unit = {
+  override def init(grammar: Grammar, step: Int): Unit = {
 
   }
 }

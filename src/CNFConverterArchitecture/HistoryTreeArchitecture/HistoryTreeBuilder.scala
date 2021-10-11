@@ -2,35 +2,64 @@ package CNFConverterArchitecture.HistoryTreeArchitecture
 
 import GrammarArchitecture.{Grammar, Rule}
 import ParseTreeArchitecture.ParseTree
+import com.sun.org.apache.xerces.internal.impl.xpath.XPath.Step
 
 import scala.collection.mutable.ListBuffer
 
 class HistoryTreeBuilder() extends HistoryBuilder {
-  var historyTrees = new ListBuffer[HistoryTree]
+  private var historyTreesLambda = new ListBuffer[HistoryTree]
+  private var historyTreesChain = new ListBuffer[HistoryTree]
+  private var historyTreesRenaming = new ListBuffer[HistoryTree]
 
-  override def init(grammar: Grammar): Unit = {
+  override def init(grammar: Grammar, step: Int): Unit = {
     // create a historyTree for each of all the original rules
+    val historyTree: ListBuffer[HistoryTree] = ListBuffer()
+
     for (rule <- grammar.getRules()) {
-      historyTrees.append(HistoryTreeNode(rule, Set(HistoryTreeLeaf), 0))
+      historyTree.append(HistoryTreeNode(rule, Set(HistoryTreeLeaf), 0))
+    }
+
+    step match {
+      case 1 => historyTreesLambda = historyTree
+      case 2 => historyTreesChain = historyTree
+      case 3 => historyTreesRenaming = historyTree
+      case _ => ???
     }
   }
 
   override def ruleUpdated(oldRule: Rule, newRule: Rule, step: Int): Unit = {
     if(step == 2){
       val newTree = HistoryTreeNode(oldRule, Set(HistoryTreeNode(newRule, Set(HistoryTreeLeaf), 2)),2)
-      historyTrees += newTree
+      historyTreesChain += newTree
     }
-    var tree = findTreeWithRule(oldRule)
+    var tree = findTreeWithRule(oldRule, step)
     if(tree.equals(HistoryTreeLeaf)){
       //???     //TODO: The tree does not exist
     }
-    historyTrees-=tree
+
     var newTree = createNewRule(tree, oldRule, newRule, step)
-    historyTrees+=newTree
+
+    step match {
+      case 1 =>
+        historyTreesLambda-=tree
+        historyTreesLambda+=newTree
+      case 2 =>
+        historyTreesChain-=tree
+        historyTreesChain+=newTree
+      case 3 =>
+        historyTreesRenaming-=tree
+        historyTreesRenaming+=newTree
+    }
+
   }
 
-  def findTreeWithRule(rule: Rule): HistoryTree = {
+  def findTreeWithRule(rule: Rule, step: Int): HistoryTree = {
     var correctTree:HistoryTree = HistoryTreeLeaf
+    val historyTrees = step match {
+      case 1 => historyTreesLambda
+      case 2 => historyTreesChain
+      case 3 => historyTreesRenaming
+    }
     for (tree <- historyTrees) {
       if (treeContainsRule(tree, rule)) {
         correctTree = tree
@@ -71,12 +100,16 @@ class HistoryTreeBuilder() extends HistoryBuilder {
     }
   }
 
-  def getHistoryTrees(): ListBuffer[HistoryTree] = {
-    historyTrees
+  def getHistoryTrees(step:Int): ListBuffer[HistoryTree] = {
+    step match {
+      case 1 => historyTreesLambda
+      case 2 => historyTreesChain
+      case 3 => historyTreesRenaming
+    }
   }
 
-  def getPreviousRule(rule: Rule): Rule = {
-    val tree = findTreeWithRule(rule)
+  def getPreviousRule(rule: Rule, step:Int): Rule = {
+    val tree = findTreeWithRule(rule, step)
     findPreviousRule(rule, tree)
   }
 

@@ -84,9 +84,6 @@ class ReverseParseTreeTest {
         ParseTreeNode(NonTerminal("C"), ListBuffer(ParseTreeLeaf(Terminal("c")))),
         ParseTreeNode(NonTerminal("D"), ListBuffer(ParseTreeLeaf(Terminal("d"))))
       ))
-    println(historyTreeBuilder.getHistoryTrees())
-    println(reversedParseTreeActual)
-    println(reversedTreeExpected)
     assert(reversedParseTreeActual == reversedTreeExpected)
   }
 

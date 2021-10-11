@@ -16,10 +16,13 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
   private val ruleUpdatingBuilder = CNFFactory.createHistoryTreeBuilder()
 
   def getGrammarOnCNF(grammar: Grammar):Grammar = {
-    ruleUpdatingBuilder.init(grammar)
+
     var convertedGrammar = grammar
+    ruleUpdatingBuilder.init(convertedGrammar, 1)
     convertedGrammar = eliminateLambda(convertedGrammar)
+    ruleUpdatingBuilder.init(convertedGrammar, 2)
     convertedGrammar = eliminateChains(convertedGrammar)
+    ruleUpdatingBuilder.init(convertedGrammar, 3)
     convertedGrammar = fixRightSides(convertedGrammar)
     convertedGrammar
   }
