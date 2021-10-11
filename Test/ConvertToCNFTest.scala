@@ -29,8 +29,9 @@ class ConvertToCNFTest {
     val rule11:Rule = new Rule(new NonTerminal("A"), ListBuffer(new Terminal("a") ,new NonTerminal("A")))
     val rule12:Rule = new Rule(new NonTerminal("B"), ListBuffer(new Terminal("b")))
     val rule13 = new Rule(NonTerminal("AA"), ListBuffer(NonTerminal("B")))
+    val rule14 = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A")))
 
-    val rules2: Set[Rule] = Set(rule6, rule7, rule9, rule10, rule11, rule12, rule13)
+    val rules2: Set[Rule] = Set(rule6, rule7, rule9, rule10, rule11, rule12, rule13, rule14)
     val grammarExpected: Grammar = new Grammar(rules2, new NonTerminal("S"))
     val grammarConverted = converter.eliminateLambda(grammar1)
 

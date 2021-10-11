@@ -17,7 +17,62 @@ object ParseTreeConverter {
     reversedParseTree
   }
 
-  def reverseLambda(tree: ParseTree, builder: HistoryTreeBuilder, lambdaParses: LambdaParseBuilder): ParseTree = {
+  def reverseLambda(tree: ParseTree, historyTreeBuilder: HistoryTreeBuilder, lambdaBuilder: LambdaParseBuilder): ParseTree = {
+    reverseLambdaOfSubTrees(tree, historyTreeBuilder, lambdaBuilder).head
+  }
+
+  private def reverseLambdaOfSubTrees(tree: ParseTree, historyTreeBuilder: HistoryTreeBuilder, lambdaBuilder: LambdaParseBuilder): ListBuffer[ParseTree] = {
+    tree match {
+      case ParseTreeNode(name, children) =>
+        var childTrees: ListBuffer[ParseTree] = ListBuffer()
+        for(child <- children){
+          childTrees ++= reverseLambdaOfSubTrees(child, historyTreeBuilder, lambdaBuilder)
+        }
+        var currentRule = getCurrentRule(name, children)
+
+        val prevRule = getPreviousRule(historyTreeBuilder, name, children)
+
+        val currentRuleIsInAHistoryTree = historyTreeBuilder.findTreeWithRule(currentRule) != HistoryTreeLeaf
+        val prevRuleExists = prevRule != null
+        if(!currentRuleIsInAHistoryTree){   // The previous rule is not an original rule (or the top layer of a lambda rule), so just pass the child-trees on the the next layer of the tree
+          return childTrees
+        }
+
+        currentRule = getCurrentRule(name, childTrees)
+
+        if(!prevRuleExists || currentRule.getRight() == prevRule.getRight()){    // the rules are equal, so there are no lambda parses missing from the tree or it is just a normal rule that was not affected in this step
+          return ListBuffer(ParseTreeNode(name, childTrees))
+        }
+
+        var newChildTrees: ListBuffer[ParseTree] = ListBuffer()
+        var lastFoundIndex: Int = -1
+        for(elem <- prevRule.getRight()){
+          val currentRuleRightSide = currentRule.getRight()
+          breakable{
+            for(i <- lastFoundIndex + 1 until currentRuleRightSide.size){    // Only go through the ones that have not already been found
+              if(elem.isInstanceOf[Terminal]){
+                newChildTrees += ParseTreeLeaf(Terminal(elem.getName()))
+                lastFoundIndex += 1
+                break   // go to next element if the current is a terminal - this is the end of this tree
+              }
+              if(currentRuleRightSide(i) == elem){
+                lastFoundIndex += 1 // increase counter
+                newChildTrees += childTrees(i)  //add the tree from childTrees to the new child-trees list
+                break // the elem is already included in current tree, move on to next elem
+              }
+              // build the lambda parse for this elem and include in tree
+              val lambdaParse = lambdaBuilder.getLambdaParses(NonTerminal(elem.getName()))
+              newChildTrees += lambdaParse
+            }
+          }
+        }
+        ListBuffer(ParseTreeNode(name, newChildTrees))
+
+      case ParseTreeLeaf(name) => ListBuffer(ParseTreeLeaf(name))
+    }
+  }
+
+  def reverseLambda2(tree: ParseTree, builder: HistoryTreeBuilder, lambdaParses: LambdaParseBuilder): ParseTree = {
     tree match {
       case ParseTreeNode(nonTerm, children) =>
         val currentRule = getCurrentRule(nonTerm, children)
@@ -114,7 +169,9 @@ object ParseTreeConverter {
 
         // If the previous rule exist (meaning it wasn't only invented for renaming)
         // Combine the current root with the converted child trees
-        if (prevRule != null) {
+        val currentRule = getCurrentRule(name, children)
+        val currentRuleExistsInHistoryTrees = historyTreeBuilder.findTreeWithRule(currentRule) != HistoryTreeLeaf
+        if (currentRuleExistsInHistoryTrees) {
           ListBuffer(ParseTreeNode(name, childTrees))
         } else { // The rule was invented for renaming and the list of reversed subtrees, should just be passed on to the parent (this part is where layers are decreased)
           childTrees

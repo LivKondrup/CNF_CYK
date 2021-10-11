@@ -26,7 +26,7 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
 
   private def makeLambdaRules(rule: Rule, nullables: Set[RuleElement], grammar: Grammar): Set[Rule] = {
     var newRules = Set[Rule]()
-    var idxOfLastNonterm = -1
+    var idxOfLastNonTerm = -1
     var freshNonTerm = rule.getLeft()
     breakable{
       for(i <- rule.getRight().indices){
@@ -35,37 +35,61 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
           val freshNonTerm2 = getFreshNonTerminal(new Grammar(grammar.getRules().concat(newRules), grammar.getStartVariable()))
           val restOfRule = rule.getRight().clone().slice(i+1, rule.getRight().length)
           val restOfRightSideHasNullables = restOfRule.intersect(nullables.toList).nonEmpty
+
+          val ruleElemsSinceLastNonTerm = rule.getRight().clone().slice(idxOfLastNonTerm+1, i)
+
           if (!restOfRightSideHasNullables){   // Current is last nullable
-            val ruleElemsSinceLastNonTerm = rule.getRight().clone().slice(idxOfLastNonterm+1, i)
             val ruleElemsAfterThisNonTerm = rule.getRight().clone().slice(i+1, rule.getRight().length)
             val rule1 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += elem)
             val rule2 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() ++= ruleElemsAfterThisNonTerm)
-            if(rule1.getRight().nonEmpty){
-              newRules += rule1
-              ruleUpdatingBuilder.ruleUpdated(rule, rule1, 1)
-            }
-            if(rule2.getRight().nonEmpty){
-              newRules += rule2
-              ruleUpdatingBuilder.ruleUpdated(rule, rule2, 1)
-            }
-            idxOfLastNonterm = i
+
+            newRules ++= updateRules(rule, nullables, newRules, i, rule1, rule2)
+
+            idxOfLastNonTerm = i
             break
           }
-          val ruleElemsSinceLastNonTerm = rule.getRight().clone().slice(idxOfLastNonterm+1, i)
+
+          // if everything after this is nullable
+          val restOfRuleHasOnlyNullables = restOfRule.diff(nullables.toList).isEmpty
+          if(restOfRuleHasOnlyNullables){
+            val rule3 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += elem)
+            //
+            val previousElemsInRule = rule.getRight().clone().slice(0, i)
+            val previousElemsHasNullables = previousElemsInRule.intersect(nullables.toList).nonEmpty
+            if (!previousElemsHasNullables) { // This is the first nullable
+              ruleUpdatingBuilder.ruleUpdated(rule, rule3, 1)
+            }
+            newRules += rule3
+          }
+
           val rule1 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += elem += freshNonTerm2)
           val rule2 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += freshNonTerm2)
-          if(rule1.getRight().nonEmpty){
-            newRules += rule1
-            ruleUpdatingBuilder.ruleUpdated(rule, rule1, 1)
-          }
-          if(rule2.getRight().nonEmpty){
-            newRules += rule2
-            ruleUpdatingBuilder.ruleUpdated(rule, rule2, 1)
-          }
-          idxOfLastNonterm = i
+          newRules ++= updateRules(rule, nullables, newRules, i, rule1, rule2)
+          idxOfLastNonTerm = i
           freshNonTerm = freshNonTerm2
         }
       }
+    }
+    newRules
+  }
+
+  private def updateRules(rule: Rule, nullables: Set[RuleElement], currentRules: Set[Rule], i: Int, rule1: Rule, rule2: Rule): Set[Rule] = {
+    var newRules = currentRules
+    val previousElemsInRule = rule.getRight().clone().slice(0, i)
+    val previousElemsHasNullables = previousElemsInRule.intersect(nullables.toList).nonEmpty
+    if (!previousElemsHasNullables) { // This is the first nullable
+      if (rule1.getRight().nonEmpty) {
+        ruleUpdatingBuilder.ruleUpdated(rule, rule1, 1)
+      }
+      if (rule2.getRight().nonEmpty) {
+        ruleUpdatingBuilder.ruleUpdated(rule, rule2, 1)
+      }
+    }
+    if (rule1.getRight().nonEmpty) {
+      newRules += rule1
+    }
+    if (rule2.getRight().nonEmpty) {
+      newRules += rule2
     }
     newRules
   }
@@ -89,7 +113,6 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
         newRules -= rule
       }
     }
-
 
     new Grammar(newRules, grammar.getStartVariable())
   }

@@ -22,7 +22,7 @@ class HistoryTreeBuilder() extends HistoryBuilder {
     }
     var tree = findTreeWithRule(oldRule)
     if(tree.equals(HistoryTreeLeaf)){
-      ???     //TODO: The tree does not exist
+      //???     //TODO: The tree does not exist
     }
     historyTrees-=tree
     var newTree = createNewRule(tree, oldRule, newRule, step)

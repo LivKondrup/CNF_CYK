@@ -3,6 +3,7 @@ import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
 import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryTreeNode}
 import ParseTreeArchitecture.{ParseTreeConverter, ParseTreeLeaf, ParseTreeNode}
+import javax.swing.text.StyledEditorKit.AlignmentAction
 import org.junit.jupiter.api.{BeforeEach, Test}
 
 import scala.collection.mutable.ListBuffer
@@ -81,11 +82,14 @@ class ReverseParseTreeTest {
         ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Terminal("a")))),
         ParseTreeLeaf(Terminal("b")),
         ParseTreeNode(NonTerminal("C"), ListBuffer(ParseTreeLeaf(Terminal("c")))),
-        ParseTreeNode(NonTerminal("D"), ListBuffer(ParseTreeLeaf(Terminal("d")))),
+        ParseTreeNode(NonTerminal("D"), ListBuffer(ParseTreeLeaf(Terminal("d"))))
       ))
-
+    println(historyTreeBuilder.getHistoryTrees())
+    println(reversedParseTreeActual)
+    println(reversedTreeExpected)
     assert(reversedParseTreeActual == reversedTreeExpected)
   }
+
 
   @Test
   def reverseChainsSimpleTest(): Unit = {
@@ -140,7 +144,7 @@ class ReverseParseTreeTest {
 
     val factory = new ConverterForReversingTrees()
     val converter = new ConvertToCNF(factory)
-    converter.getGrammarOnCNF(grammar)
+    val convertedGrammar = converter.getGrammarOnCNF(grammar)    // to update history tree and lambda parses
 
     val historyTreeBuilder = factory.getHistoryTreeBuilder
     val lambdaParses = factory.getLambdaParses
@@ -151,6 +155,44 @@ class ReverseParseTreeTest {
       ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Lambda()))),
       ParseTreeNode(NonTerminal("B"), ListBuffer(ParseTreeLeaf(Terminal("b"))))
     ))
+
+    assert(reversedParseTreeActual == reversedTreeExpected)
+  }
+
+  @Test
+  def reverseLambdaAdvancedTest(): Unit = {
+    val rule1 = new Rule(NonTerminal("S"), ListBuffer(Terminal("a"), NonTerminal("B"), Terminal("c"), NonTerminal("D"), Terminal("e")))
+    val rule2 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
+    val rule3 = new Rule(NonTerminal("B"), ListBuffer(Lambda()))
+    val rule4 = new Rule(NonTerminal("D"), ListBuffer(Lambda()))
+
+    grammar = new Grammar(Set(rule1, rule2, rule3, rule4), NonTerminal("S"))
+
+    val factory = new ConverterForReversingTrees()
+    val converter = new ConvertToCNF(factory)
+    val convertedGrammar = converter.getGrammarOnCNF(grammar)    // to update history tree and lambda parses
+
+    val historyTreeBuilder = factory.getHistoryTreeBuilder
+    val lambdaParses = factory.getLambdaParses
+
+    val tree = ParseTreeNode(NonTerminal("S"), ListBuffer(
+      ParseTreeLeaf(Terminal("a")),
+      ParseTreeNode(NonTerminal("B"), ListBuffer(ParseTreeLeaf(Terminal("b")))),
+      ParseTreeNode(NonTerminal("AA"), ListBuffer(
+        ParseTreeLeaf(Terminal("c")),
+        ParseTreeLeaf(Terminal("e"))
+      ))
+    ))
+    val reversedParseTreeActual = ParseTreeConverter.reverseLambda(tree, historyTreeBuilder, lambdaParses)
+    val reversedTreeExpected = ParseTreeNode(NonTerminal("S"), ListBuffer(
+      ParseTreeLeaf(Terminal("a")),
+      ParseTreeNode(NonTerminal("B"), ListBuffer(ParseTreeLeaf(Terminal("b")))),
+      ParseTreeLeaf(Terminal("c")),
+      ParseTreeNode(NonTerminal("D"), ListBuffer(ParseTreeLeaf(Lambda()))),
+      ParseTreeLeaf(Terminal("e"))))
+
+    println(reversedParseTreeActual)
+    println(reversedTreeExpected)
 
     assert(reversedParseTreeActual == reversedTreeExpected)
   }
