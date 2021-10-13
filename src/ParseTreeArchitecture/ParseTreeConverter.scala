@@ -12,8 +12,8 @@ object ParseTreeConverter {
 
   def reverseTreeToOriginalGrammar(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder, lambdaParses: LambdaParses, chainParses: ChainParses): ParseTree = {
     var reversedParseTree = reverseRenaming(parseTree, historyTreeBuilder)
-    reversedParseTree = reverseChains(parseTree, historyTreeBuilder, chainParses)
-    reversedParseTree = reverseLambda(parseTree, historyTreeBuilder, lambdaParses)
+    reversedParseTree = reverseChains(reversedParseTree, historyTreeBuilder, chainParses)
+    reversedParseTree = reverseLambda(reversedParseTree, historyTreeBuilder, lambdaParses)
     reversedParseTree
   }
 
@@ -131,12 +131,17 @@ object ParseTreeConverter {
           childTrees ++= newChild
         }
 
+        if(prevRule == null){ // TODO: should be something else maybe??
+          return ListBuffer(ParseTreeNode(name, childTrees))
+        }
+
         if(prevRule.getRight().head == Lambda() && prevRule.getRight().length == 2){    // A chain rule with lambda in front (the way derivations are represented)
           var chainTree = chainParses.getParses()((prevRule.getLeft(), NonTerminal(prevRule.getRight()(1).getName())))  // prevRule is chainRule derivation, so right side is nonTerminal with lambda in front
           // add chainTree as parent to childTrees
           return ListBuffer(addChildrenToBottomOfChainTree(chainTree, childTrees))
         }
-        return childTrees
+
+        childTrees
     }
   }
 
@@ -156,9 +161,6 @@ object ParseTreeConverter {
   private def reverseRenamingOfSubTrees(parseTree: ParseTree, historyTreeBuilder: HistoryTreeBuilder): ListBuffer[ParseTree] = {
     parseTree match {
       case ParseTreeNode(name, children) =>
-        // Build the rule at the root of the current tree
-        val prevRule: Rule = getPreviousRule(historyTreeBuilder, name, children, 3)
-
         // Recursively reverse the child trees
         val childTrees: ListBuffer[ParseTree] = ListBuffer()
         for (child <- children) {

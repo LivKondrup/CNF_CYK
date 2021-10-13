@@ -205,10 +205,10 @@ class ReverseParseTreeTest {
     val factory = new ConverterForReversingTrees()
     val converter = new ConvertToCNF(factory)
     val convertedGrammar = converter.getGrammarOnCNF(grammar)
-    println(convertedGrammar.getRules())
 
-    assert(CYKParser.canParse("abce", convertedGrammar))
+    assert(CYKParser.canParse("adce", convertedGrammar))
     val treeAfterCYK = CYKParser.parseAndGetParseTree("adce", convertedGrammar)
+    println("con:", convertedGrammar.getRules())
     val reversedTree = ParseTreeConverter.reverseTreeToOriginalGrammar(treeAfterCYK, factory.getHistoryTreeBuilder, factory.getLambdaParses, factory.getChainParses)
 
     val expectedTree = ParseTreeNode(NonTerminal("S"), ListBuffer(
@@ -218,6 +218,43 @@ class ReverseParseTreeTest {
       ParseTreeNode(NonTerminal("D"), ListBuffer(ParseTreeLeaf(Lambda()))),
       ParseTreeLeaf(Terminal("e"))))
 
+    println(reversedTree)
+    println(expectedTree)
+
+    assert(reversedTree == expectedTree)
+  }
+
+  @Test
+  def reverseAllStepsSimpleTest(): Unit = {
+    val rule1 = new Rule(NonTerminal("S"), ListBuffer(Terminal("a"), NonTerminal("B"), Terminal("c")))
+    val rule2 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
+    val rule3 = new Rule(NonTerminal("B"), ListBuffer(Lambda()))
+    val rule4 = new Rule(NonTerminal("B"), ListBuffer(NonTerminal("D")))
+    val rule5 = new Rule(NonTerminal("D"), ListBuffer(Terminal("d")))
+
+    grammar = new Grammar(Set(rule1, rule2, rule3, rule4, rule5), NonTerminal("S"))
+
+    val factory = new ConverterForReversingTrees()
+    val converter = new ConvertToCNF(factory)
+    val convertedGrammar = converter.getGrammarOnCNF(grammar)
+
+    assert(CYKParser.canParse("adc", convertedGrammar))
+    val treeAfterCYK = CYKParser.parseAndGetParseTree("adc", convertedGrammar)
+    val reversedTree = ParseTreeConverter.reverseTreeToOriginalGrammar(treeAfterCYK, factory.getHistoryTreeBuilder, factory.getLambdaParses, factory.getChainParses)
+
+    val expectedTree = ParseTreeNode(NonTerminal("S"), ListBuffer(
+      ParseTreeLeaf(Terminal("a")),
+      ParseTreeNode(NonTerminal("B"), ListBuffer(
+        ParseTreeNode(NonTerminal("D"), ListBuffer(
+          ParseTreeLeaf(Terminal("d"))
+        ))
+      )),
+      ParseTreeLeaf(Terminal("c"))
+    ))
+
+    println(reversedTree)
+    println(expectedTree)
+    println(convertedGrammar.getRules())
     assert(reversedTree == expectedTree)
   }
 }

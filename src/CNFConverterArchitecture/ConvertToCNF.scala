@@ -43,7 +43,7 @@ class ConvertToCNF(CNFFactory: CNFConverterFactory) {
 
           if (!restOfRightSideHasNullables){   // Current is last nullable
             val ruleElemsAfterThisNonTerm = rule.getRight().clone().slice(i+1, rule.getRight().length)
-            val rule1 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += elem)
+            val rule1 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() += elem ++= ruleElemsAfterThisNonTerm)
             val rule2 = new Rule(freshNonTerm, ruleElemsSinceLastNonTerm.clone() ++= ruleElemsAfterThisNonTerm)
 
             newRules ++= updateRules(rule, nullables, newRules, i, rule1, rule2)

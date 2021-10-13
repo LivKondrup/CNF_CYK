@@ -13,17 +13,13 @@ object CYKParser {
   // This assumes that the given word CAN be parsed
   def parseAndGetParseTree(word: String, grammar: Grammar): ParseTree = {
     val parseArray = parseAndGetArray(word, grammar)
-    val parseTree = getParseTreeFromParseArray(parseArray, grammar, 0, 0, word)
+    val parseTree = getParseTreeFromParseArray(parseArray, grammar, 0, 0, word, grammar.getStartVariable())
     parseTree
   }
 
-  private def getParseTreeFromParseArray(parseArray: Array[Array[ListBuffer[NonTerminal]]], grammar: Grammar, i: Int, j: Int, word: String): ParseTree = {
-    var currentNonTerminal = parseArray(i)(j).head
+  private def getParseTreeFromParseArray(parseArray: Array[Array[ListBuffer[NonTerminal]]], grammar: Grammar, i: Int, j: Int, word: String, currentNonTerm: NonTerminal): ParseTree = {
+    var currentNonTerminal = currentNonTerm
     if(i<word.length-1){
-
-      if(i == 0 && j == 0){
-        currentNonTerminal = grammar.getStartVariable()
-      }
 
       val pairsThatMightDeriveThis = combineUsefulPairs(parseArray, i, j).asInstanceOf[ListBuffer[(ListBuffer[RuleElement], Int)]]
       val usefulRulesRightSide = grammar.getRules().filter(rule => rule.getLeft().equals(currentNonTerminal)).map(rule => rule.getRight())
@@ -34,14 +30,14 @@ object CYKParser {
 
       val posLefti = i+amountOfDifferentEntriesForUseFulPairs-indexOfUseFulPair
 
-      val leftTree = getParseTreeFromParseArray(parseArray, grammar, posLefti, j, word)
-      val rightTree= getParseTreeFromParseArray(parseArray, grammar, i+indexOfUseFulPair+1, j+indexOfUseFulPair+1, word)
+      val nextLeftNonTerminal = usefulPairs.head._1.head.asInstanceOf[NonTerminal]
+      val nextRightNonTerminal = usefulPairs.head._1(1).asInstanceOf[NonTerminal]
+
+      val leftTree = getParseTreeFromParseArray(parseArray, grammar, posLefti, j, word, nextLeftNonTerminal)
+      val rightTree= getParseTreeFromParseArray(parseArray, grammar, i+indexOfUseFulPair+1, j+indexOfUseFulPair+1, word, nextRightNonTerminal)
 
       ParseTreeNode(currentNonTerminal, ListBuffer(leftTree, rightTree))
     } else {  // i==max
-      if(i == 0 && j == 0) {
-        currentNonTerminal = grammar.getStartVariable()
-      }
       ParseTreeNode(currentNonTerminal, ListBuffer(ParseTreeLeaf(Terminal(word.charAt(j).toString))))
     }
   }
