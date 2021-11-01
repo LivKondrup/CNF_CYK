@@ -1,7 +1,7 @@
 package GrammarArchitecture
 
 class Grammar(rules: Set[Rule], start:NonTerminal) {
-  var nonTerminals = Set[NonTerminal]()
+  private var nonTerminals = Set[NonTerminal]()
   rules.foreach(rule => nonTerminals += rule.getLeft())
 
   def hasNonTerminal(nonTerminal: NonTerminal): Boolean = {

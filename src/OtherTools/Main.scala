@@ -13,5 +13,20 @@ object Main {
     elems2 += NonTerminal("B")
     println(ruleElems)
 
+    val a = Array.ofDim[String](5,5)
+    println(a(1)(1))
+    println(a(4)(2))
+    fill(a)
+    println(a(1)(1))
+    println(a(4)(2))
+
+    for(i <- a){
+      println(a)
+    }
+  }
+
+  def fill(array:Array[Array[String]]): Unit = {
+    array(1)(1) = "a"
+    array(4)(2) = "b"
   }
 }
