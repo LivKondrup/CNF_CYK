@@ -131,7 +131,7 @@ object ParseTreeConverter {
           childTrees ++= newChild
         }
 
-        if(prevRule == null){ // TODO: should be something else maybe??
+        if(prevRule == null){
           return ListBuffer(ParseTreeNode(name, childTrees))
         }
 
