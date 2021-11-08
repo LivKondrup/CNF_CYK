@@ -2,7 +2,6 @@ package LambdaExperiments
 
 import java.io.{File, PrintWriter}
 import java.util.Calendar
-
 import CNFConverterArchitecture.AbstractFactory.SimpleConverter
 import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture._

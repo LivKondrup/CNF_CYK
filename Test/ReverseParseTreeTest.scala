@@ -3,6 +3,7 @@ import CNFConverterArchitecture.ConvertToCNF
 import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
 import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryTreeNode}
 import ParseTreeArchitecture.{ParseTreeConverter, ParseTreeLeaf, ParseTreeNode}
+
 import javax.swing.text.StyledEditorKit.AlignmentAction
 import org.junit.jupiter.api.{BeforeEach, Test}
 

@@ -1,12 +1,8 @@
 package CNFConverterArchitecture
 
 import CNFConverterArchitecture.AbstractFactory.CNFConverterFactory
-import CNFConverterArchitecture.Chain.{ChainParseBuilder, ChainParses}
-import CNFConverterArchitecture.Lambda.{LambdaParseBuilder, LambdaParses}
-import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, RuleElement, Terminal}
-import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryBuilder, HistoryTreeBuilder}
+import GrammarArchitecture._
 
-import scala.collection.IterableOnce.iterableOnceExtensionMethods
 import scala.collection.mutable.{HashMap, ListBuffer}
 import scala.util.control.Breaks._
 

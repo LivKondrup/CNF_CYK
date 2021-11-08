@@ -1,3 +1,5 @@
+package GraphArchitecture
+
 import GrammarArchitecture.Terminal
 
 class Edge (from:Int, to:Int, letter:Terminal) {
