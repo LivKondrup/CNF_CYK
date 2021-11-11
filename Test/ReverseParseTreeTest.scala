@@ -1,10 +1,7 @@
 import CNFConverterArchitecture.AbstractFactory.ConverterForReversingTrees
 import CNFConverterArchitecture.ConvertToCNF
-import GrammarArchitecture.{Grammar, Lambda, NonTerminal, Rule, Terminal}
-import CNFConverterArchitecture.HistoryTreeArchitecture.{HistoryTreeBuilder, HistoryTreeNode}
+import GrammarArchitecture._
 import ParseTreeArchitecture.{ParseTreeConverter, ParseTreeLeaf, ParseTreeNode}
-
-import javax.swing.text.StyledEditorKit.AlignmentAction
 import org.junit.jupiter.api.{BeforeEach, Test}
 
 import scala.collection.mutable.ListBuffer
@@ -209,7 +206,6 @@ class ReverseParseTreeTest {
 
     assert(CYKParser.canParse("adce", convertedGrammar))
     val treeAfterCYK = CYKParser.parseAndGetParseTree("adce", convertedGrammar)
-    println("con:", convertedGrammar.getRules())
     val reversedTree = ParseTreeConverter.reverseTreeToOriginalGrammar(treeAfterCYK, factory.getHistoryTreeBuilder, factory.getLambdaParses, factory.getChainParses)
 
     val expectedTree = ParseTreeNode(NonTerminal("S"), ListBuffer(
@@ -218,9 +214,6 @@ class ReverseParseTreeTest {
       ParseTreeLeaf(Terminal("c")),
       ParseTreeNode(NonTerminal("D"), ListBuffer(ParseTreeLeaf(Lambda()))),
       ParseTreeLeaf(Terminal("e"))))
-
-    println(reversedTree)
-    println(expectedTree)
 
     assert(reversedTree == expectedTree)
   }
@@ -253,9 +246,6 @@ class ReverseParseTreeTest {
       ParseTreeLeaf(Terminal("c"))
     ))
 
-    println(reversedTree)
-    println(expectedTree)
-    println(convertedGrammar.getRules())
     assert(reversedTree == expectedTree)
   }
 }
