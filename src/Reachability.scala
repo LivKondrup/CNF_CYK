@@ -30,13 +30,8 @@ object Reachability {
     val (rule, intermediateNode) = howToParseTable(from)(to)(nonTerminal)
     // figure out which case we are in
     rule.getRight().size match {
-      case 1 => rule.getRight().head match {
-        case singleNonTerm: NonTerminal =>    // chain rule
-          val childTree = getParseTreeFromHowToParseTable(from, to, singleNonTerm, howToParseTable)
-          ParseTreeNode(nonTerminal, ListBuffer(childTree))
-        case singleTerminal: Terminal =>    // The end is found
-          ParseTreeNode(nonTerminal, ListBuffer(ParseTreeLeaf(singleTerminal)))
-      }
+      case 1 => // the size of the right hand side is one means that it is a terminal rule (the grammar is in CNF)
+        ParseTreeNode(nonTerminal, ListBuffer(ParseTreeLeaf(rule.getRight().head)))
       case 2 =>   // There is an intermediate node
         val leftTreeNonTerminal = NonTerminal(rule.getRight().head.getName())
         val rightTreeNonTerminal = NonTerminal(rule.getRight()(1).getName())
