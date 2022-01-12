@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 
 object Reachability {
 
-  private def makeReachabilityTable(graph: Graph, grammar: Grammar): (Array[Array[Set[NonTerminal]]], Array[Array[mutable.HashMap[NonTerminal, (Rule, Int)]]]) = {
+  private def makeReachabilityTable(graph: Graph, grammar: Grammar): (Array[Array[Set[NonTerminal]]], Array[Array[mutable.HashMap[NonTerminal, (Rule, Int, Int)]]]) = {
     // convert graph to table T
     val graphTable = convertGraphToTable(graph)
 
@@ -26,8 +26,8 @@ object Reachability {
 
   }
 
-  private def getParseTreeFromHowToParseTable(from:Int, to:Int, nonTerminal:NonTerminal, howToParseTable:Array[Array[mutable.HashMap[NonTerminal, (Rule, Int)]]]): ParseTree = {
-    val (rule, intermediateNode) = howToParseTable(from)(to)(nonTerminal)
+  private def getParseTreeFromHowToParseTable(from:Int, to:Int, nonTerminal:NonTerminal, howToParseTable:Array[Array[mutable.HashMap[NonTerminal, (Rule, Int, Int)]]]): ParseTree = {
+    val (rule, intermediateNode, length) = howToParseTable(from)(to)(nonTerminal)
     // figure out which case we are in
     rule.getRight().size match {
       case 1 => // the size of the right hand side is one means that it is a terminal rule (the grammar is in CNF)
@@ -54,7 +54,7 @@ object Reachability {
     reachabilityBetweenNodesWithNonTerminal(reachabilityTable, from, to, grammar.getStartVariable())
   }
 
-  private def fillReachabilityTable(graphTable: Array[Array[Set[Terminal]]], grammar: Grammar): (Array[Array[Set[NonTerminal]]], Array[Array[mutable.HashMap[NonTerminal, (Rule, Int)]]]) = {
+  private def fillReachabilityTable(graphTable: Array[Array[Set[Terminal]]], grammar: Grammar): (Array[Array[Set[NonTerminal]]], Array[Array[mutable.HashMap[NonTerminal, (Rule, Int, Int)]]]) = {
     val howToParseTable = makeEmptyHowToParseTable(graphTable.length)
 
     val reachabilityTable = initializeReachabilityTable(graphTable, grammar, howToParseTable)
@@ -81,7 +81,7 @@ object Reachability {
     (reachabilityTable, howToParseTable)
   }
 
-  private def findTwoStepReachability(reachabilityTable:Array[Array[Set[NonTerminal]]], grammar: Grammar, howToParseTable: Array[Array[mutable.HashMap[NonTerminal, (Rule, Int)]]]): Unit = {
+  private def findTwoStepReachability(reachabilityTable:Array[Array[Set[NonTerminal]]], grammar: Grammar, howToParseTable: Array[Array[mutable.HashMap[NonTerminal, (Rule, Int, Int)]]]): Unit = {
     for(i <- reachabilityTable.indices){
       var reachableNodesFromI = reachabilityTable(i).map(entry => if(entry.nonEmpty){reachabilityTable(i).indexOf(entry)} else {-1}).to(ListBuffer)
       reachableNodesFromI = reachableNodesFromI.filter(i => i != -1)
@@ -94,7 +94,7 @@ object Reachability {
 
         for(otherNode <- reachableNodesFromNode){
           val nodeToOtherNode = reachabilityTable(node)(otherNode)
-          var possiblePairs: ListBuffer[ListBuffer[NonTerminal]] = ListBuffer()
+          val possiblePairs: ListBuffer[ListBuffer[NonTerminal]] = ListBuffer()
           for(x <- iToNode; y <- nodeToOtherNode){
             possiblePairs += ListBuffer(x,y)
           }
@@ -103,8 +103,15 @@ object Reachability {
             if(possiblePairs.contains(rule.getRight())){
               reachabilityTable(i)(otherNode) += rule.getLeft()
 
-              // update howToParseTable
-              howToParseTable(i)(otherNode) += (rule.getLeft() -> (rule, node))
+              val lengthToParseFirstPart = howToParseTable(i)(node)(NonTerminal(rule.getRight().head.getName()))._3
+              val lengthToParseSecondPart = howToParseTable(node)(otherNode)(NonTerminal(rule.getRight()(1).getName()))._3
+              val length = lengthToParseFirstPart + lengthToParseSecondPart
+
+
+              if(!howToParseTable(i)(otherNode).contains(rule.getLeft()) || howToParseTable(i)(otherNode)(rule.getLeft())._3 > length){     // If there is no already known shorter way of getting from i to other node
+                // update howToParseTable
+                howToParseTable(i)(otherNode) += (rule.getLeft() -> (rule, node, length))
+              }
             }
           }
         }
@@ -112,7 +119,7 @@ object Reachability {
     }
   }
 
-  private def fillWithSizeOneStep(reachabilityTable:Array[Array[Set[NonTerminal]]], grammar: Grammar, howToParseTable: Array[Array[mutable.HashMap[NonTerminal, (Rule, Int)]]]): Unit= {
+  private def fillWithSizeOneStep(reachabilityTable:Array[Array[Set[NonTerminal]]], grammar: Grammar, howToParseTable: Array[Array[mutable.HashMap[NonTerminal, (Rule, Int, Int)]]]): Unit= {
     for(i <- reachabilityTable.indices){
       for(j <- reachabilityTable.indices){
         val alreadyFound = reachabilityTable(i)(j)
@@ -122,13 +129,13 @@ object Reachability {
 
         // update howToParseTable
         for(rule <- rulesWithElemsFromAlreadyFoundOnRightSide){
-          howToParseTable(i)(j) += (rule.getLeft() -> (rule, -1))
+          howToParseTable(i)(j) += (rule.getLeft() -> (rule, -1, 1))
         }
       }
     }
   }
 
-  private def initializeReachabilityTable(graphTable: Array[Array[Set[Terminal]]], grammar: Grammar, howToParseTable: Array[Array[mutable.HashMap[NonTerminal, (Rule, Int)]]]): Array[Array[Set[NonTerminal]]] = {
+  private def initializeReachabilityTable(graphTable: Array[Array[Set[Terminal]]], grammar: Grammar, howToParseTable: Array[Array[mutable.HashMap[NonTerminal, (Rule, Int, Int)]]]): Array[Array[Set[NonTerminal]]] = {
     val reachabilityTable = makeEmptyReachabilityTable(graphTable.length)
     for(i <- reachabilityTable.indices){
       for(j <- reachabilityTable.indices){
@@ -139,7 +146,7 @@ object Reachability {
 
         // update howToParseTable
         for(rule <- rulesWithElemsFromListOnRightSide){
-          howToParseTable(i)(j) += (rule.getLeft() -> (rule, -1))
+          howToParseTable(i)(j) += (rule.getLeft() -> (rule, -1, 0))
         }
       }
     }
@@ -154,8 +161,8 @@ object Reachability {
     reachabilityTable
   }
 
-  private def makeEmptyHowToParseTable(size: Int): Array[Array[mutable.HashMap[NonTerminal, (Rule, Int)]]] = {
-    val howToParseTable = Array.ofDim[mutable.HashMap[NonTerminal, (Rule, Int)]](size, size)
+  private def makeEmptyHowToParseTable(size: Int): Array[Array[mutable.HashMap[NonTerminal, (Rule, Int, Int)]]] = {
+    val howToParseTable = Array.ofDim[mutable.HashMap[NonTerminal, (Rule, Int, Int)]](size, size)
     for(i <- 0 until size; j <- 0 until size){
       howToParseTable(i)(j) = mutable.HashMap()
     }

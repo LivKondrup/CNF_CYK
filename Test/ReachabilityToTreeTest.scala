@@ -92,8 +92,8 @@ class ReachabilityToTreeTest {
     val rule9 = new Rule(NonTerminal("D"), ListBuffer(Terminal("d")))
     val grammar = new Grammar(Set(rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9), NonTerminal("S"))
 
-    val actualGrammar = Reachability.getParseTree(graph, 0, 3, grammar)
-    val expectedGrammar = ParseTreeNode(NonTerminal("S"), ListBuffer(
+    val actualTree = Reachability.getParseTree(graph, 0, 3, grammar)
+    val expectedTree = ParseTreeNode(NonTerminal("S"), ListBuffer(
       ParseTreeNode(NonTerminal("K"), ListBuffer(
         ParseTreeNode(NonTerminal("A"), ListBuffer(ParseTreeLeaf(Terminal("a")))),
         ParseTreeNode(NonTerminal("B"), ListBuffer(ParseTreeLeaf(Terminal("b"))))
@@ -110,6 +110,31 @@ class ReachabilityToTreeTest {
       ))
     ))
 
-    assert(actualGrammar == expectedGrammar)
+    assert(actualTree == expectedTree)
+  }
+
+  @Test
+  def findsTheShortestPath(): Unit ={
+    val edge1 = new Edge(0, 1, Terminal("a"))
+    val edge2 = new Edge(0, 2, Terminal("c"))
+    val edge3 = new Edge(1, 2, Terminal("b"))
+    val edge4 = new Edge(2, 3, Terminal("d"))
+    val graph = new Graph(Set(edge1, edge2, edge3, edge4))
+
+    val rule1 = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("C"), NonTerminal("D")))
+    val rule2 = new Rule(NonTerminal("S"), ListBuffer(NonTerminal("A"), NonTerminal("K")))
+    val rule3 = new Rule(NonTerminal("K"), ListBuffer(NonTerminal("D"), NonTerminal("B")))
+    val rule4 = new Rule(NonTerminal("A"), ListBuffer(Terminal("a")))
+    val rule5 = new Rule(NonTerminal("B"), ListBuffer(Terminal("b")))
+    val rule6 = new Rule(NonTerminal("C"), ListBuffer(Terminal("c")))
+    val rule7 = new Rule(NonTerminal("D"), ListBuffer(Terminal("d")))
+    val grammar = new Grammar(Set(rule1, rule2, rule3, rule4, rule5, rule6, rule7), NonTerminal("S"))
+
+    val actualTree = Reachability.getParseTree(graph, 0, 3, grammar)
+    val expectedTree = ParseTreeNode(NonTerminal("S"), ListBuffer(
+      ParseTreeNode(NonTerminal("C"), ListBuffer(ParseTreeLeaf(Terminal("c")))),
+      ParseTreeNode(NonTerminal("D"), ListBuffer(ParseTreeLeaf(Terminal("d"))))))
+
+    assert(actualTree == expectedTree)
   }
 }
